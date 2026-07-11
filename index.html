@@ -581,7 +581,7 @@ async function quickAction(act){
   hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);checkAch();
 }
 
-const AI_WORKER_URL='https://muse-api.YOUR-SUBDOMAIN.workers.dev'; // 部署 Worker 后替换为实际 URL
+const AI_WORKER_URL='https://muse-api.h7walker.workers.dev'; // deployed Muse AI backend
 
 async function generateResp(userMsg){
   if(!AI_WORKER_URL.includes('YOUR-SUBDOMAIN')){try{
