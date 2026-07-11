@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Muse 博悟</title>
+<style>
+:root{
+  --bg:#08080c;--bg2:#0f0f17;--surface:rgba(20,20,35,0.85);
+  --surface2:rgba(20,20,35,0.5);--gold:#c9a96e;--gold-bright:#e0c78a;
+  --gold-dim:#8a7040;--gold-glass:rgba(201,169,110,0.08);
+  --gold-glass2:rgba(201,169,110,0.15);--gold-glass3:rgba(201,169,110,0.22);
+  --text:#e6e4dd;--text-dim:#787880;--text-mid:#a0a098;
+  --xp-bar:#4da6ff;--red:#e05555;--green:#5cad6e;
+  --radius:16px;--radius-sm:10px;--radius-xs:8px;
+  --font: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --transition:0.3s cubic-bezier(0.4,0,0.2,1);
+  --safe-bottom:env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);
+  height:100vh;height:100dvh;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;user-select:none;
+}
+/* ── Particles ── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;animation:float-up linear infinite;opacity:0}
+@keyframes float-up{
+  0%{transform:translateY(100vh) scale(0);opacity:0}
+  10%{opacity:0.6}90%{opacity:0.3}
+  100%{transform:translateY(-10vh) scale(1.5);opacity:0}
+}
+/* ── Loading ── */
+#loading{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s,visibility 0.8s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.l-ring-outer{width:120px;height:120px;border-radius:50%;border:2px solid transparent;border-top-color:var(--gold);animation:ring-spin 2s linear infinite;display:flex;align-items:center;justify-content:center}
+.l-ring-inner{width:78px;height:78px;border-radius:50%;border:2px solid transparent;border-bottom-color:var(--gold-bright);animation:ring-spin 2.5s linear reverse infinite;display:flex;align-items:center;justify-content:center;font-size:36px}
+@keyframes ring-spin{to{transform:rotate(360deg)}}
+.l-title{margin-top:20px;font-size:30px;font-weight:700;letter-spacing:8px;color:var(--gold-bright);animation:fade-up 1s ease-out .2s both}
+.l-sub{font-size:11px;color:var(--text-dim);letter-spacing:5px;animation:fade-up 1s ease-out .5s both}
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+/* ── Museum Selector ── */
+#museum-selector{position:fixed;inset:0;z-index:900;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity 0.8s,visibility 0.8s;overflow-y:auto;padding:40px 20px}
+#museum-selector.show{opacity:1;visibility:visible}
+.selector-title{font-size:24px;font-weight:700;letter-spacing:4px;color:var(--gold-bright);margin-bottom:4px;text-align:center}
+.selector-sub{font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-bottom:36px;text-align:center}
+.museum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;max-width:900px;width:100%}
+.m-card{position:relative;padding:18px 20px;border-radius:var(--radius);background:var(--surface2);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:var(--transition);display:flex;gap:12px;align-items:flex-start}
+.m-card:hover:not(.locked){border-color:var(--gold);background:var(--gold-glass);transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,169,110,0.08)}
+.m-card.locked{opacity:0.35;cursor:not-allowed}
+.mc-icon{font-size:32px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,255,255,0.04);flex-shrink:0}
+.mc-info{flex:1;min-width:0}
+.mc-name{font-size:14px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.mc-loc{font-size:10px;color:var(--gold-dim);letter-spacing:1px;margin-bottom:5px}
+.mc-desc{font-size:11px;color:var(--text-dim);line-height:1.5}
+.mc-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:9px;font-weight:600;letter-spacing:1px}
+.mc-badge.open{background:rgba(165,214,167,0.12);color:#a5d6a7;border:1px solid rgba(165,214,167,0.2)}
+.mc-badge.soon{background:rgba(255,183,77,0.1);color:#ffb74d;border:1px solid rgba(255,183,77,0.15)}
+.mc-badge.planned{background:rgba(158,158,158,0.1);color:#9e9e9e;border:1px solid rgba(158,158,158,0.1)}
+.mc-region{position:absolute;top:12px;right:14px;font-size:9px;color:var(--text-dim);letter-spacing:1px}
+/* ── App Shell ── */
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;position:relative;z-index:1}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,169,110,0.08);z-index:10;min-height:52px}
+.header-brand{display:flex;align-items:center;gap:8px}
+.header-logo{font-size:20px;font-weight:700;letter-spacing:2px;color:var(--gold-bright)}
+.header-museum{font-size:11px;color:var(--text-dim);margin-left:4px}
+.header-actions{display:flex;gap:6px}
+.h-btn{padding:6px 12px;border-radius:16px;font-size:11px;border:1px solid rgba(201,169,110,0.2);background:transparent;color:var(--text-dim);cursor:pointer;transition:var(--transition);white-space:nowrap}
+.h-btn:hover{border-color:var(--gold);color:var(--gold)}
+.h-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.tab-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.tab-pane{display:none;padding:16px 16px 24px;animation:fadeIn .3s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* ── Tab Bar ── */
+#tab-bar{display:flex;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(201,169,110,0.08);padding-bottom:var(--safe-bottom);z-index:10}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;gap:2px;cursor:pointer;transition:var(--transition);border:none;background:transparent;color:var(--text-dim);font-family:var(--font)}
+.tab-item.active{color:var(--gold-bright)}
+.tab-icon{font-size:20px;transition:var(--transition)}
+.tab-label{font-size:10px;letter-spacing:0.5px}
+/* ── Discover Tab ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.section-title{font-size:13px;font-weight:700;letter-spacing:1px;color:var(--text-mid)}
+.section-more{font-size:11px;color:var(--gold-dim);cursor:pointer}
+/* Hero */
+.hero-card{position:relative;border-radius:var(--radius);overflow:hidden;margin-bottom:20px;background:linear-gradient(135deg,rgba(201,169,110,0.12),rgba(201,169,110,0.03));border:1px solid var(--gold-glass3);padding:24px 20px;display:flex;flex-direction:column;gap:12px}
+.hero-ribbon{position:absolute;top:14px;right:16px;font-size:28px}
+.hero-greeting{font-size:11px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase}
+.hero-artefact{font-size:20px;font-weight:700;color:var(--gold-bright)}
+.hero-meta{font-size:11px;color:var(--text-dim)}
+.hero-desc{font-size:13px;color:var(--text-mid);line-height:1.6}
+.hero-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:20px;background:var(--gold);color:var(--bg);border:none;font-weight:600;font-size:13px;cursor:pointer;transition:var(--transition);margin-top:4px;align-self:flex-start}
+.hero-btn:hover{background:var(--gold-bright);transform:scale(1.03)}
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface2);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius-sm);padding:14px 12px;text-align:center;transition:var(--transition)}
+.stat-card:hover{border-color:var(--gold-glass3)}
+.stat-value{font-size:22px;font-weight:700;color:var(--text)}
+.stat-label{font-size:10px;color:var(--text-dim);margin-top:4px;letter-spacing:1px}
+.stat-value.gold{color:var(--gold-bright)}
+.stat-value.blue{color:var(--xp-bar)}
+/* Horizontal scroll */
+.h-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:20px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+.h-scroll::-webkit-scrollbar{display:none}
+.artefact-card{min-width:220px;max-width:220px;background:var(--surface2);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius);padding:16px 14px;cursor:pointer;transition:var(--transition);scroll-snap-align:start;flex-shrink:0}
+.artefact-card:hover{border-color:var(--gold-glass3);transform:translateY(-2px)}
+.ac-icon{font-size:32px;margin-bottom:10px}
+.ac-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.ac-date{font-size:10px;color:var(--text-dim);margin-bottom:6px}
+.ac-collected{font-size:10px;color:var(--gold);margin-top:4px}
+.ac-museum-tag{font-size:9px;color:var(--text-dim);background:var(--gold-glass);padding:2px 8px;border-radius:8px;display:inline-block}
+/* ── Chat Tab ── */
+.chat-mode-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:8px;-webkit-overflow-scrolling:touch}
+.chat-mode-bar::-webkit-scrollbar{display:none}
+.mode-pill{padding:6px 14px;border-radius:16px;font-size:11px;border:1px solid rgba(201,169,110,0.2);background:transparent;color:var(--text-dim);cursor:pointer;transition:var(--transition);white-space:nowrap;flex-shrink:0}
+.mode-pill:hover{border-color:var(--gold);color:var(--gold)}
+.mode-pill.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.mode-pill.locked{opacity:0.3;pointer-events:none}
+.chat-exhibit-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:8px}
+.chat-exhibit-bar::-webkit-scrollbar{display:none}
+.exhibit-chip{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--surface2);border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:var(--transition);white-space:nowrap;flex-shrink:0;font-size:12px}
+.exhibit-chip:hover{border-color:var(--gold)}
+.exhibit-chip.active{background:var(--gold-glass2);border-color:rgba(201,169,110,0.3)}
+#chat-messages{display:flex;flex-direction:column;gap:12px;margin-bottom:12px;min-height:200px}
+.msg{display:flex;gap:8px;max-width:90%;animation:fadeIn .35s ease}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.bot{align-self:flex-start}
+.msg-avatar{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid rgba(201,169,110,0.12)}
+.msg.user .msg-avatar{background:var(--gold);border:none;color:var(--bg)}
+.msg-content{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.65;word-break:break-word;background:var(--surface2);border:1px solid rgba(255,255,255,0.03)}
+.msg.user .msg-content{background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.18);border-bottom-right-radius:4px}
+.msg.bot .msg-content{border-bottom-left-radius:4px}
+/* Exhibit card in chat */
+.ec{background:rgba(201,169,110,0.05);border:1px solid rgba(201,169,110,0.12);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
+.ec-h{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.ec-icon{font-size:24px}.ec-name{font-weight:600;font-size:13px}.ec-meta{font-size:10px;color:var(--text-dim)}
+.ec-desc{font-size:12px;color:var(--text-dim);line-height:1.5}
+.graph-mini{background:rgba(201,169,110,0.05);border:1px solid rgba(201,169,110,0.1);border-radius:var(--radius-xs);padding:8px;margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:10px}
+.gm-node{padding:3px 8px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(201,169,110,0.18);color:var(--gold);cursor:pointer}
+.typing-dots{display:flex;gap:4px;padding:2px 0}.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--gold-dim);animation:bounce 1.4s infinite ease-in-out both}
+.typing-dots span:nth-child(1){animation-delay:-.32s}.typing-dots span:nth-child(2){animation-delay:-.16s}
+@keyframes bounce{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
+.quick-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.qa-btn{padding:7px 15px;border-radius:16px;font-size:11px;border:1px solid rgba(201,169,110,0.18);background:transparent;color:var(--text-dim);cursor:pointer;transition:var(--transition);white-space:nowrap}
+.qa-btn:hover{border-color:var(--gold);color:var(--gold)}
+.chat-input-wrap{display:flex;gap:8px}
+#chat-input{flex:1;padding:10px 16px;border-radius:20px;border:1px solid rgba(201,169,110,0.12);background:rgba(255,255,255,0.03);color:var(--text);font-size:13px;font-family:var(--font);outline:none}
+#chat-input:focus{border-color:var(--gold)}
+#chat-input::placeholder{color:var(--text-dim)}
+.chat-send{width:40px;height:40px;border-radius:50%;border:none;background:var(--gold);color:var(--bg);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.chat-send:disabled{opacity:.3}
+/* ── Collection Tab ── */
+.collection-filter{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto}
+.collection-filter::-webkit-scrollbar{display:none}
+.f-pill{padding:5px 13px;border-radius:14px;font-size:11px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text-dim);cursor:pointer;white-space:nowrap}
+.f-pill.active{background:var(--gold-glass2);border-color:var(--gold);color:var(--gold)}
+.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.c-item{background:var(--surface2);border:1px solid rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:14px;cursor:pointer;transition:var(--transition);text-align:center;position:relative}
+.c-item:hover{border-color:var(--gold-glass3);transform:translateY(-1px)}
+.c-item.locked{opacity:.35}
+.c-item-icon{font-size:36px;margin-bottom:8px}
+.c-item-name{font-size:12px;font-weight:600;margin-bottom:2px}
+.c-item-meta{font-size:10px;color:var(--text-dim)}
+.c-item-badge{position:absolute;top:8px;right:8px;font-size:10px;color:var(--gold)}
+.c-progress{margin-bottom:16px;padding:14px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.04);display:flex;gap:12px;align-items:center}
+.cp-icon{font-size:24px}.cp-info{flex:1}.cp-title{font-size:11px;color:var(--text-dim)}.cp-count{font-size:15px;font-weight:700;margin-top:2px}
+.cp-bar{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:6px;overflow:hidden}
+.cp-bar-inner{height:100%;background:var(--gold);border-radius:2px;transition:width .6s}
+/* ── Profile Tab ── */
+.profile-card{background:var(--surface2);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius);padding:20px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.pc-avatar{width:56px;height:56px;border-radius:50%;background:var(--gold-glass2);display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid var(--gold);flex-shrink:0}
+.pc-info{flex:1}.pc-name{font-size:16px;font-weight:700}.pc-level{font-size:12px;color:var(--gold);margin-top:2px}
+.pc-xp{margin-top:8px}.pc-xp-bar{height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden}
+.pc-xp-inner{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--xp-bar));border-radius:2px;transition:width .8s}
+.pc-xp-text{font-size:10px;color:var(--text-dim);margin-top:3px;text-align:right}
+.profile-nav{display:flex;flex-direction:column;gap:2px;margin-bottom:16px}
+.p-nav-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:var(--transition)}
+.p-nav-item:hover{border-color:rgba(201,169,110,0.15)}
+.p-nav-icon{font-size:18px;width:32px;text-align:center}
+.p-nav-label{flex:1;font-size:13px}
+.p-nav-arrow{color:var(--text-dim);font-size:12px}
+.ach-preview{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.ach-preview::-webkit-scrollbar{display:none}
+.ach-badge{min-width:64px;padding:10px 8px;border-radius:var(--radius-xs);background:var(--surface2);text-align:center;font-size:22px;border:1px solid rgba(255,255,255,0.03);transition:var(--transition)}
+.ach-badge.unlocked{border-color:rgba(255,215,0,0.3);background:rgba(255,215,0,0.06)}
+.ach-badge.locked{opacity:.3}
+.ach-badge-name{font-size:9px;color:var(--text-dim);margin-top:4px}
+/* ── Popups ── */
+#ach-popup{position:fixed;top:16px;right:16px;z-index:200;padding:14px 18px;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid #ffd700;border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 20px rgba(255,215,0,.15);opacity:0;transform:translateX(120%);transition:all .5s cubic-bezier(.16,1,.3,1);pointer-events:none;display:flex;gap:10px;align-items:center;max-width:280px}
+#ach-popup.show{opacity:1;transform:translateX(0)}
+.ap-icon{font-size:24px}.ap-title{font-weight:700;color:#ffd700;font-size:12px}.ap-sub{color:var(--text-dim);font-size:10px;margin-top:2px}
+#level-up{position:fixed;inset:0;z-index:180;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
+#level-up.show{opacity:1}.level-up-text{font-size:28px;font-weight:800;letter-spacing:4px;color:var(--gold-bright);text-shadow:0 0 40px rgba(201,169,110,.5);animation:level-boom 2s ease-out forwards}
+@keyframes level-boom{0%{transform:scale(.3);opacity:0}30%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:.3s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal-inner{background:var(--surface2);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(201,169,110,0.15);border-radius:var(--radius);padding:20px;max-width:400px;width:90%;max-height:70vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:14px}
+.modal-close{width:100%;padding:10px;border-radius:16px;border:1px solid rgba(201,169,110,0.15);background:transparent;color:var(--text);cursor:pointer;margin-top:14px;font-size:13px}
+.modal-close:hover{background:var(--gold-glass)}
+/* Scrollbar */
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(201,169,110,.1);border-radius:2px}
+/* Mobile adaptation */
+@media(max-width:400px){.collection-grid{grid-template-columns:repeat(2,1fr)}.artefact-card{min-width:170px;max-width:170px}}
+</style>
+</head>
+<body>
+<div id="particles"></div>
+<div id="loading">
+  <div class="l-ring-outer"><div class="l-ring-inner">🏛️</div></div>
+  <div class="l-title">MUSE</div><div class="l-sub">博 悟</div>
+</div>
+<div id="museum-selector">
+  <div class="museum-grid" id="museumGrid"></div>
+</div>
+<div id="ach-popup"><div class="ap-icon"></div><div><div class="ap-title"></div><div class="ap-sub"></div></div></div>
+<div id="level-up"><div class="level-up-text"></div></div>
+<div class="modal-overlay" id="ach-modal">
+  <div class="modal-inner"><div class="modal-title"></div><div id="ach-list"></div><button class="modal-close" onclick="toggleModal('ach-modal')">Close</button></div>
+</div>
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal-inner"><div class="modal-title">Settings</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="font-size:13px">Reset Progress</span><button class="h-btn" onclick="resetProgress()" style="color:#e05555;border-color:rgba(224,85,85,0.3)">Reset</button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="font-size:13px">Switch Museum</span><button class="h-btn" onclick="showMuseumSelector()">Change</button></div>
+    </div>
+    <button class="modal-close" onclick="toggleModal('settings-modal')">Close</button>
+  </div>
+</div>
+<div id="app">
+  <div class="app-header">
+    <div class="header-brand"><span class="header-logo">MUSE</span><span class="header-museum" id="headerMuseum"></span></div>
+    <div class="header-actions">
+      <button class="h-btn active" onclick="switchLang('en')">EN</button>
+      <button class="h-btn" onclick="switchLang('zh')">中</button>
+    </div>
+  </div>
+  <div class="tab-content" id="tabContent">
+    <!-- Discover Tab -->
+    <div class="tab-pane active" id="tab-discover"></div>
+    <!-- Chat Tab -->
+    <div class="tab-pane" id="tab-chat"></div>
+    <!-- Collection Tab -->
+    <div class="tab-pane" id="tab-collection"></div>
+    <!-- Profile Tab -->
+    <div class="tab-pane" id="tab-profile"></div>
+  </div>
+  <div id="tab-bar">
+    <button class="tab-item active" data-tab="discover"><span class="tab-icon">🔍</span><span class="tab-label">Discover</span></button>
+    <button class="tab-item" data-tab="chat"><span class="tab-icon">💬</span><span class="tab-label">Chat</span></button>
+    <button class="tab-item" data-tab="collection"><span class="tab-icon">📚</span><span class="tab-label">Codex</span></button>
+    <button class="tab-item" data-tab="profile"><span class="tab-icon">👤</span><span class="tab-label">Profile</span></button>
+  </div>
+</div>
+
+<script>
+// ══════════════════ I18N ══════════════════
+let LANG='en';
+const I18N={
+  en:{
+    sel_title:'Choose Your Museum',sel_sub:'Select a museum to begin your journey',
+    open:'Open Now',soon:'Coming Soon',planned:'Planned',
+    tab_discover:'Discover',tab_chat:'Chat',tab_codex:'Codex',tab_profile:'Profile',
+    disc_greeting:'Good to see you',disc_question:'What draws your eye today?',
+    disc_daily:'Today\'s Highlight',disc_explore:'Start Exploring',
+    disc_hot:'Popular Masterpieces',disc_recent:'Recently Viewed',
+    stat_insight:'Insight XP',stat_codex:'Codex',stat_depth:'Avg Depth',
+    coll_title:'Your Codex',coll_all:'All',coll_collected:'Collected',coll_pending:'To Discover',
+    prof_museum_switch:'Switch Museum',prof_ach:'Achievements',prof_settings:'Settings',prof_about:'About Muse',
+    prof_about_text:'Muse 博悟 — an AI-powered museum companion. Explore humanity\'s greatest treasures through natural conversation. Built as a graduation project, 2026.',
+    chat_welcome:'Choose a masterpiece above to begin your journey.<br><br>Every meaningful question earns <strong>Insight XP</strong>.',
+    chat_placeholder:'Ask me anything...',
+    mode_explore:'Explore',mode_narrate:'Narrate',mode_debate:'Debate',mode_children:'Kids',
+    qa_deeper:'Go Deeper',qa_angle:'Another Angle',qa_quiz:'Challenge Me',qa_relate:'Connections',
+    level_observer:'Observer',level_explorer:'Explorer',level_scholar:'Scholar',level_curator:'Curator',
+    ach_new:'New Achievement!',xp_gain:'+XP',codex_unlock:'Codex unlocked!',
+    debate_locked:'Debate unlocks at Scholar (300 XP)',
+    context_title:'Related:',
+  },
+  zh:{
+    sel_title:'选择你的博物馆',sel_sub:'选择一座博物馆，开启探索之旅',
+    open:'开放中',soon:'即将开放',planned:'规划中',
+    tab_discover:'发现',tab_chat:'对话',tab_codex:'图鉴',tab_profile:'我的',
+    disc_greeting:'你好',disc_question:'今天什么吸引了你的目光？',
+    disc_daily:'今日精选',disc_explore:'开始探索',
+    disc_hot:'热门馆藏',disc_recent:'最近浏览',
+    stat_insight:'洞察力',stat_codex:'图鉴',stat_depth:'平均深度',
+    coll_title:'我的图鉴',coll_all:'全部',coll_collected:'已收集',coll_pending:'待发现',
+    prof_museum_switch:'切换博物馆',prof_ach:'成就',prof_settings:'设置',prof_about:'关于博悟',
+    prof_about_text:'Muse 博悟 — AI驱动的博物馆伴侣。通过自然对话探索人类最伟大的宝藏。2026年毕业设计作品。',
+    chat_welcome:'选择上方一件杰作，开启探索之旅。<br><br>每次有意义的提问都能获得<strong>洞察力经验值</strong>。',
+    chat_placeholder:'尽管问我……',
+    mode_explore:'探索',mode_narrate:'讲解',mode_debate:'辩论',mode_children:'儿童',
+    qa_deeper:'深入探索',qa_angle:'换个角度',qa_quiz:'挑战测试',qa_relate:'关联文物',
+    level_observer:'观察者',level_explorer:'探索者',level_scholar:'学者',level_curator:'策展人',
+    ach_new:'新成就！',xp_gain:'+经验值',codex_unlock:'图鉴解锁！',
+    debate_locked:'辩论需学者等级（300经验）解锁',
+    context_title:'关联：',
+  }
+};
+function t(k){return I18N[LANG][k]||k}
+function switchLang(l){
+  LANG=l;document.querySelectorAll('.h-btn').forEach(b=>b.classList.toggle('active',(b.textContent.trim()===(l==='en'?'EN':'中'))));
+  document.querySelectorAll('.tab-item').forEach(b=>{
+    const tb=b.dataset.tab;if(tb)b.querySelector('.tab-label').textContent=t('tab_'+tb);
+  });
+  renderMuseumSelector();renderDiscover();renderChat();renderCollection();renderProfile();
+}
+// ══════════════════ PARTICLES ══════════════════
+function spawnParticles(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*18)+'s';
+    p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';c.appendChild(p);
+  }
+}
+// ══════════════════ MUSEUM DATA ══════════════════
+const MUSEUMS=[
+  {id:'british',name_en:'British Museum',name_zh:'大英博物馆',icon:'🏛️',region_en:'Europe',region_zh:'欧洲',loc_en:'London, UK',loc_zh:'英国·伦敦',desc_en:'The world\'s first public national museum. 8 million works spanning two million years.',desc_zh:'世界上第一座国家公共博物馆。800万件藏品跨越两百万年历史。',status:'open'},
+  {id:'louvre',name_en:'Louvre',name_zh:'卢浮宫',icon:'🖼️',region_en:'Europe',region_zh:'欧洲',loc_en:'Paris, France',loc_zh:'法国·巴黎',desc_en:'The world\'s most-visited museum — from the Mona Lisa to Winged Victory.',desc_zh:'全球访问量最高的博物馆——从蒙娜丽莎到胜利女神。',status:'open'},
+  {id:'met',name_en:'The Met',name_zh:'大都会',icon:'🗽',region_en:'North America',region_zh:'北美',loc_en:'New York, USA',loc_zh:'美国·纽约',desc_en:'5,000 years of art across 2 million works.',desc_zh:'跨越五千年、两百万件作品。',status:'coming_soon'},
+  {id:'palace',name_en:'Palace Museum',name_zh:'故宫博物院',icon:'🏯',region_en:'Asia',region_zh:'亚洲',loc_en:'Beijing, China',loc_zh:'中国·北京',desc_en:'The Forbidden City — 1.8 million imperial treasures.',desc_zh:'紫禁城——180万件皇家珍宝。',status:'planned'},
+  {id:'egyptian',name_en:'Egyptian Museum',name_zh:'埃及博物馆',icon:'🏺',region_en:'Africa',region_zh:'非洲',loc_en:'Cairo, Egypt',loc_zh:'埃及·开罗',desc_en:'Tutankhamun\'s gold mask anchors 120,000 artefacts.',desc_zh:'图坦卡蒙黄金面具领衔12万件文物。',status:'planned'},
+  {id:'uffizi',name_en:'Uffizi Gallery',name_zh:'乌菲兹美术馆',icon:'🎨',region_en:'Europe',region_zh:'欧洲',loc_en:'Florence, Italy',loc_zh:'意大利·佛罗伦萨',desc_en:'The cradle of the Renaissance — Botticelli, Leonardo, Raphael.',desc_zh:'文艺复兴的摇篮——波提切利、达芬奇、拉斐尔。',status:'planned'},
+];
+let currentMuseum=null;
+
+// ══════════════════ EXHIBIT DATA ══════════════════
+const EXHIBITS={
+  british:[
+    {id:'b1',name_en:'Rosetta Stone',name_zh:'罗塞塔石碑',icon:'🪨',date_en:'196 BC',date_zh:'公元前196年',cat_en:'Granodiorite Stele',cat_zh:'花岗闪长岩石碑',mat:'Granodiorite',dims:'114×72×28 cm, 760 kg',origin_en:'El-Rashid, Egypt',origin_zh:'埃及 拉希德',desc_en:'The key that unlocked three millennia of Egyptian civilisation — the same decree in three scripts: hieroglyphs, Demotic, and Ancient Greek.',desc_zh:'揭开三千年埃及文明的钥匙——同一道法令以三种文字铭刻。',deep_en:'Thomas Young identified royal names; Champollion cracked the code in 1822. The top-right corner broken in antiquity.',deep_zh:'托马斯·杨识别出王名圈；商博良1822年破译。右上角在古代已缺损。',facts_en:['18 lines of Greek changed history','Weighs 760 kg — as much as a small car','Discovered by accident during French fortification dig'],facts_zh:['18行希腊文改变了历史','重760公斤','法国士兵挖地基时偶然发现'],rel:[{id:'b3',name_en:'Mummy of Katebet',name_zh:'卡特贝特木乃伊',r_en:'Same Egyptian gallery',r_zh:'同一埃及展厅'}],quiz:{q_en:['How many scripts?','Who cracked it in 1822?'],a_en:['Three','Champollion'],q_zh:['几种文字？','谁在1822年破译？'],a_zh:['三种','商博良']}},
+    {id:'b2',name_en:'Parthenon Marbles',name_zh:'帕特农雕塑',icon:'🏛️',date_en:'447–432 BC',date_zh:'公元前447-432年',cat_en:'Marble Sculpture',cat_zh:'大理石雕塑',mat:'Pentelic Marble',dims:'Frieze ~160 m',origin_en:'Athens, Greece',origin_zh:'希腊 雅典',desc_en:'Crowning achievement of Classical Greece under Phidias — the Panathenaic procession with gods among mortals.',desc_zh:'古典希腊巅峰之作——泛雅典娜节游行，众神与凡人交融。',deep_en:'Originally blazed with paint and gold. Elgin\'s removal authorisation document never found. The Acropolis Museum displays plaster casts of missing pieces.',deep_zh:'原有着鲜艳色彩和黄金。埃尔金移除的授权文件从未被找到。新卫城博物馆展示缺失部分的石膏模型。',facts_en:['Originally painted in vivid colours','Elgin spent £74,000 (~£7m today)','Greece requests their return since 1983'],facts_zh:['原有着鲜艳色彩','埃尔金花费约合今日700万英镑','希腊自1983年起要求归还'],rel:[{id:'b6',name_en:'Benin Bronzes',name_zh:'贝宁青铜器',r_en:'Restitution debate',r_zh:'归还争议'}],quiz:{q_en:['Which goddess?','Who removed them?'],a_en:['Athena Parthenos','Lord Elgin'],q_zh:['献给哪位女神？','谁移走了它们？'],a_zh:['雅典娜','埃尔金勋爵']}},
+    {id:'b3',name_en:'Mummy of Katebet',name_zh:'卡特贝特木乃伊',icon:'⚰️',date_en:'c.1300 BC',date_zh:'约公元前1300年',cat_en:'Painted Mummy',cat_zh:'彩绘木乃伊',mat:'Wood, plaster, linen, gold leaf',dims:'~170 cm',origin_en:'Thebes, Egypt',origin_zh:'埃及 底比斯',desc_en:'A Chantress of Amun — temple singer of high status. Gilded mask for eternity; scarab prevents heart from testifying against her.',desc_zh:'阿蒙神的女歌者——镀金面具表象永恒；圣甲虫防止心脏作不利证词。',deep_en:'CT scans reveal arthritis and missing teeth — deeply human across 3,300 years. Her name means "cool/refreshing."',deep_zh:'CT扫描显示关节炎和缺牙——跨越3300年的深刻人性。她的名字意为"清凉/清新"。',facts_en:['Name means "cool/refreshing"','CT shows osteoarthritis','Scarab was a heart "get out of judgement free" card'],facts_zh:['名字意为"清凉/清新"','CT显示骨关节炎','圣甲虫是心脏的"免罪金牌"'],rel:[{id:'b1',name_en:'Rosetta Stone',name_zh:'罗塞塔石碑',r_en:'Egyptian collection',r_zh:'埃及馆藏'}],quiz:{q_en:['Her occupation?','Amulet on her chest?'],a_en:['Chantress of Amun','Scarab beetle'],q_zh:['她的职业？','胸口的护身符？'],a_zh:['阿蒙女歌者','圣甲虫']}},
+    {id:'b4',name_en:'Sutton Hoo Helmet',name_zh:'萨顿胡头盔',icon:'⛑️',date_en:'c.AD 625',date_zh:'约公元625年',cat_en:'Iron & Bronze Helmet',cat_zh:'铁质青铜头盔',mat:'Iron, tinned bronze, garnets',dims:'31.8×21.5 cm',origin_en:'Suffolk, England',origin_zh:'英格兰 萨福克',desc_en:'The face of early England — garnet eyebrows, dragon crest, from a 27-metre ship burial.',desc_zh:'早期英格兰的面孔——石榴石眉毛、龙冠，出土于27米长的船葬墓。',deep_en:'Funded by Edith Pretty, a widow who sensed something beneath the mounds. Inspired Tolkien\'s Rohirrim.',deep_zh:'由伊迪丝·普雷蒂资助——感知到土丘下埋藏着什么的寡妇。启发了托尔金的洛汗骑士。',facts_en:['No body — acidic sand dissolved all remains','Ship was 27m — only a "sand shadow" left','Funded by Edith Pretty, a Suffolk widow'],facts_zh:['没有遗体——酸性沙土溶解了一切','船长27米——只剩"沙影"','由萨福克寡妇伊迪丝资助'],rel:[{id:'b5',name_en:'Lewis Chessmen',name_zh:'刘易斯棋子',r_en:'Medieval British finds',r_zh:'英国中世纪发现'}],quiz:{q_en:['Type of burial?','Who funded excavation?'],a_en:['Ship burial','Edith Pretty'],q_zh:['墓葬类型？','谁资助发掘？'],a_zh:['船葬墓','伊迪丝·普雷蒂']}},
+    {id:'b5',name_en:'Lewis Chessmen',name_zh:'刘易斯棋子',icon:'♟️',date_en:'1150–1200',date_zh:'1150-1200年',cat_en:'Walrus Ivory Chess',cat_zh:'海象牙棋子',mat:'Walrus ivory, whale tooth',dims:'Kings ~8–10 cm',origin_en:'Found Lewis, Scotland',origin_zh:'苏格兰刘易斯岛',desc_en:'93 tiny personalities — kings stern, queens melancholy, warders biting shields in berserker frenzy.',desc_zh:'93个小人物——国王威严，王后忧郁，看守狂咬盾牌。',deep_en:'Inspired the wizard\'s chess scene in Harry Potter. 82 at British Museum, 11 at National Museum of Scotland.',deep_zh:'启发了《哈利·波特》的巫师棋场景。大英博物馆82枚，苏格兰国家博物馆11枚。',facts_en:['Inspired Harry Potter wizard chess','Warders biting shields = real berserkers','82 pieces at BM, 11 in Scotland'],facts_zh:['启发了哈利·波特巫师棋','咬盾牌的看守=真实狂暴战士','大英82枚 苏格兰11枚'],rel:[{id:'b4',name_en:'Sutton Hoo Helmet',name_zh:'萨顿胡头盔',r_en:'British medieval',r_zh:'英国中世纪'}],quiz:{q_en:['How many at BM?','Material?'],a_en:['82','Walrus ivory'],q_zh:['大英藏多少？','材料？'],a_zh:['82枚','海象牙']}},
+    {id:'b6',name_en:'Benin Bronzes',name_zh:'贝宁青铜器',icon:'🗿',date_en:'16th–18th C',date_zh:'16-18世纪',cat_en:'Brass Plaques',cat_zh:'黄铜浮雕',mat:'Brass (copper alloy)',dims:'Plaques ~45–50 cm',origin_en:'Benin Kingdom, Nigeria',origin_zh:'贝宁王国 尼日利亚',desc_en:'Supreme pre-colonial African art — lost-wax casting rivaling Renaissance Europe.',desc_zh:'前殖民时代非洲艺术的至高成就。失蜡法精妙可比文艺复兴欧洲。',deep_en:'1897 British punitive expedition looted and burned Benin City. Global symbol of colonial restitution.',deep_zh:'1897年英国讨伐军洗劫并烧毁贝宁城。殖民归还运动的全球象征。',facts_en:['Mounted on palace pillars','Lost-wax technique rivals modern tech','Nigeria building Edo Museum for returns'],facts_zh:['镶嵌在王宫木柱上','失蜡法精妙现代技术无法复制','尼日利亚建设埃多博物馆安放归还文物'],rel:[{id:'b2',name_en:'Parthenon Marbles',name_zh:'帕特农雕塑',r_en:'Restitution',r_zh:'归还争议'}],quiz:{q_en:['Casting technique?','What happened in 1897?'],a_en:['Lost-wax','British looted Benin City'],q_zh:['铸造技术？','1897年发生了什么？'],a_zh:['失蜡法','英国洗劫贝宁城']}},
+    {id:'b7',name_en:'The Great Wave',name_zh:'神奈川冲浪里',icon:'🌊',date_en:'c.1831',date_zh:'约1831年',cat_en:'Ukiyo-e Print',cat_zh:'浮世绘版画',mat:'Ink on paper',dims:'25.7×37.9 cm',origin_en:'Hokusai, Japan',origin_zh:'葛饰北斋 日本',desc_en:'The most reproduced image in art history. Not a tsunami — a rogue wave, Fuji serene beyond.',desc_zh:'艺术史上被复制最多的图像。非海啸——一股巨浪，富士山静默远方。',deep_en:'Hokusai was 70. The blue is Prussian blue — newly imported from Europe, signalling Japan\'s cautious opening.',deep_zh:'北斋时年七十。蓝色是普鲁士蓝——刚从欧洲引进，标志日本的谨慎开放。',facts_en:['Hokusai was 70','Prussian blue from Europe','Monet owned 23 Hokusai prints'],facts_zh:['北斋时年七十','普鲁士蓝由欧洲引进','莫奈藏有23幅北斋版画'],rel:[],quiz:{q_en:['Background mountain?','Hokusai\'s age?'],a_en:['Mount Fuji','70'],q_zh:['背景的山？','北斋年龄？'],a_zh:['富士山','70岁']}},
+    {id:'b8',name_en:'Oxus Treasure',name_zh:'奥克苏斯宝藏',icon:'👑',date_en:'5th–4th C BC',date_zh:'公元前5-4世纪',cat_en:'Achaemenid Gold',cat_zh:'波斯金器',mat:'Gold, silver, carnelian',dims:'170 objects',origin_en:'Oxus River, Tajikistan',origin_zh:'奥克苏斯河 塔吉克斯坦',desc_en:'Finest surviving Achaemenid metalwork — gold chariots, griffin armlets, fusion of Persia, Greece, Egypt.',desc_zh:'现存最精美的阿契美尼德金属器物——金战车、狮鹫臂环，融合波斯、希腊、埃及。',deep_en:'Surfaced in a Rawalpindi bazaar ~1880. Exact find-spot never located. Likely a temple treasury hidden during crisis.',deep_zh:'约1880年出现在拉瓦尔品第集市。确切发现地点从未被找到。可能为危机时期隐藏的寺庙宝库。',facts_en:['Never found — appeared in a bazaar','Armlets blazed with lost coloured stones','Earliest known Persian chariot'],facts_zh:['从未被找到——出现在集市上','臂环原有炫丽彩色宝石','最早的波斯战车形象'],rel:[{id:'b1',name_en:'Rosetta Stone',name_zh:'罗塞塔石碑',r_en:'Unlocking lost worlds',r_zh:'解读失落世界'}],quiz:{q_en:['Empire?','Where did it surface?'],a_en:['Achaemenid Persia','Rawalpindi bazaar'],q_zh:['哪个帝国？','出现在哪里？'],a_zh:['波斯','拉瓦尔品第集市']}},
+    {id:'b9',name_en:'Lion Hunt Relief',name_zh:'亚述猎狮浮雕',icon:'🦁',date_en:'c.645 BC',date_zh:'约公元前645年',cat_en:'Alabaster Relief',cat_zh:'雪花石膏浮雕',mat:'Gypsum alabaster',dims:'Panels H ~165 cm',origin_en:'Nineveh, Iraq',origin_zh:'尼尼微 伊拉克',desc_en:'Narrative art at its peak — the dying lioness dragging paralysed hind legs, roaring defiance.',desc_zh:'叙事艺术的巅峰——垂死的母狮拖着瘫痪后腿昂首怒吼。',deep_en:'Not sport — royal ritual: the king imposing order on chaos. Vet analysis confirms anatomical accuracy of the lioness\'s paralysis.',deep_zh:'非娱乐——王室仪式：国王对混沌施加秩序。兽医分析确认母狮瘫痪的解剖精准。',facts_en:['Ashurbanipal claimed 450+ lions','Dying lioness is anatomically accurate','Originally painted in vivid colours'],facts_zh:['亚述巴尼拔自称450+头','垂死母狮解剖精准','原着鲜艳色彩'],rel:[{id:'b7',name_en:'The Great Wave',name_zh:'神奈川冲浪里',r_en:'Man vs Nature',r_zh:'人与自然'}],quiz:{q_en:['Which king?','Symbolic meaning?'],a_en:['Ashurbanipal','Order over chaos'],q_zh:['哪位国王？','象征意义？'],a_zh:['亚述巴尼拔','秩序战胜混沌']}},
+    {id:'b10',name_en:'Holy Thorn Reliquary',name_zh:'圣荆棘圣物箱',icon:'✨',date_en:'c.1390–97',date_zh:'约1390-97年',cat_en:'Gold & Enamel',cat_zh:'黄金珐琅',mat:'Gold, enamel, gems',dims:'H 30.5 cm',origin_en:'Paris, for Jean de Berry',origin_zh:'巴黎 为贝里公爵',desc_en:'30 cm of solid gold containing a thorn from Christ\'s Crown — a theological universe in miniature.',desc_zh:'30厘米纯金容纳据信为基督荆棘冠的一根刺——一座微型神学宇宙。',deep_en:'Also commissioned the Très Riches Heures. Nearly destroyed in French Revolution. Every gem has meaning: sapphire=heaven, ruby=blood, pearl=purity.',deep_zh:'同时委托制作《豪华时祷书》。法国大革命期间险些被毁。每颗宝石有含义：蓝宝石=天堂，红宝石=血，珍珠=纯洁。',facts_en:['Commissioned Très Riches Heures too','Nearly destroyed in French Revolution','Every gem = theological meaning'],facts_zh:['同时委托《豪华时祷书》','大革命期间险些被毁','每颗宝石都有神学含义'],rel:[{id:'b5',name_en:'Lewis Chessmen',name_zh:'刘易斯棋子',r_en:'Medieval craft',r_zh:'中世纪工艺'}],quiz:{q_en:['What\'s inside?','Who commissioned?'],a_en:['Thorn from Christ\'s Crown','Jean de Berry'],q_zh:['内含什么？','谁委托？'],a_zh:['基督荆棘冠的刺','贝里公爵']}},
+  ],
+  louvre:[
+    {id:'l1',name_en:'Mona Lisa',name_zh:'蒙娜丽莎',icon:'🖼️',date_en:'1503–1519',date_zh:'1503-1519年',cat_en:'Oil on Poplar Panel',cat_zh:'杨木板油画',mat:'Oil on poplar',dims:'77×53 cm',origin_en:'Leonardo da Vinci, Florence',origin_zh:'达芬奇 佛罗伦萨',desc_en:'The most famous painting in the world. Her smile, the sfumato technique, the imaginary landscape — a portrait that became a myth.',desc_zh:'世界上最著名的画作。神秘的微笑、晕涂法、虚构的风景——一幅成为神话的肖像。',deep_en:'Stolen in 1911 by Vincenzo Peruggia — hidden under his bed for two years. The theft made it famous. Duchamp drew a moustache on a postcard copy in 1919 (L.H.O.O.Q.).',deep_zh:'1911年被佩鲁贾盗走——藏在床下两年。正是这次盗窃让它名声大噪。杜尚1919年在明信片上给她画了胡子。',facts_en:['Stolen 1911 — hidden under a bed for 2 years','Duchamp drew a moustache on her','Sits behind bulletproof glass since 1956'],facts_zh:['1911年被盗——床下藏了两年','杜尚给她画了胡子','1956年起在防弹玻璃后展出'],rel:[],quiz:{q_en:['Artist?','When was it stolen?'],a_en:['Leonardo da Vinci','1911'],q_zh:['作者？','哪年被盗？'],a_zh:['达芬奇','1911年']}},
+    {id:'l2',name_en:'Winged Victory',name_zh:'胜利女神',icon:'👼',date_en:'c.190 BC',date_zh:'约公元前190年',cat_en:'Marble Sculpture',cat_zh:'大理石雕塑',mat:'Parian marble',dims:'H 2.45 m (without head)',origin_en:'Samothrace, Greece',origin_zh:'希腊 萨莫色雷斯',desc_en:'Nike of Samothrace — the goddess of victory alighting on a ship\'s prow. Wind whips through her garments; she has no head but you feel her presence.',desc_zh:'萨莫色雷斯的胜利女神——降落在船首的女神。海风穿透衣袍；她没有头颅，但你感受到她的存在。',deep_en:'Placed atop the Daru staircase at the Louvre since 1884. The prow is a separate block. Her right hand was found separately in 1950 — she was likely cupping it to her mouth, shouting.',deep_zh:'1884年起安放在卢浮宫达鲁楼梯顶端。船首是独立石块。右手1950年单独发现——她可能正将手拢在嘴边呐喊。',facts_en:['Stands atop the iconic Daru staircase','Her right hand was found in 1950','Likely depicted shouting victory'],facts_zh:['矗立在标志性的达鲁楼梯顶端','右手1950年才被找到','可能在呐喊胜利'],rel:[{id:'l3',name_en:'Venus de Milo',name_zh:'米洛的维纳斯',r_en:'Both are iconic armless Hellenistic sculptures',r_zh:'同为无臂希腊化雕塑标志'}],quiz:{q_en:['What goddess?','Where does she stand?'],a_en:['Nike (Victory)','Daru staircase, Louvre'],q_zh:['什么女神？','她站在哪里？'],a_zh:['胜利女神','卢浮宫达鲁楼梯']}},
+    {id:'l3',name_en:'Venus de Milo',name_zh:'米洛的维纳斯',icon:'🗽',date_en:'c.130–100 BC',date_zh:'约公元前130-100年',cat_en:'Marble Sculpture',cat_zh:'大理石雕塑',mat:'Parian marble',dims:'H 2.04 m',origin_en:'Milos, Greece',origin_zh:'希腊 米洛岛',desc_en:'The ideal of classical beauty — Aphrodite, arms lost to time, her contrapposto stance radiating timeless grace.',desc_zh:'古典美的典范——阿佛洛狄忒，双臂遗失于时光，对立式平衡的站姿散发着永恒优雅。',deep_en:'Discovered 1820 by a farmer on Milos. The French acquired her after a scramble with the Ottomans. Originally she held an apple — the prize in the Judgement of Paris.',deep_zh:'1820年被米洛斯岛农夫发现。法国在与奥斯曼帝国的争夺中获得她。她原本握着一颗苹果——帕里斯裁决中的奖品。',facts_en:['Found by a farmer in 1820','France and Ottomans fought over her','She originally held an apple'],facts_zh:['1820年被农夫发现','法国和奥斯曼曾争夺她','她原本握着一颗苹果'],rel:[{id:'l2',name_en:'Winged Victory',name_zh:'胜利女神',r_en:'Hellenistic masterpieces',r_zh:'希腊化杰作'}],quiz:{q_en:['Which goddess?','Where was she found?'],a_en:['Aphrodite (Venus)','Island of Milos'],q_zh:['什么女神？','在哪里发现？'],a_zh:['阿佛洛狄忒（维纳斯）','米洛岛']}},
+    {id:'l4',name_en:'Liberty Leading',name_zh:'自由引导人民',icon:'🗽',date_en:'1830',date_zh:'1830年',cat_en:'Oil on Canvas',cat_zh:'布面油画',mat:'Oil on canvas',dims:'260×325 cm',origin_en:'Eugène Delacroix',origin_zh:'欧仁·德拉克洛瓦',desc_en:'Liberty as a bare-breasted woman holding the tricolour — leading a diverse crowd over a barricade. The defining image of the July Revolution.',desc_zh:'自由以裸露上身的女性形象手持三色旗——带领各阶层民众跨越街垒。七月革命的标志性画面。',deep_en:'Delacroix painted himself into the scene (the top-hatted man with a rifle). The boy with pistols inspired Victor Hugo\'s Gavroche in Les Misérables.',deep_zh:'德拉克洛瓦把自己画了进去（戴高帽持步枪的男子）。持双枪的少年启发了雨果《悲惨世界》中的伽弗洛什。',facts_en:['Delacroix painted himself into the scene','Inspired Gavroche in Les Misérables','The tricolour became the national flag afterwards'],facts_zh:['作者把自己画了进去','启发了《悲惨世界》伽弗洛什','此后三色旗成为法国国旗'],rel:[],quiz:{q_en:['Year of revolution?','Artist\'s cameo?'],a_en:['1830','Delacroix (top hat, rifle)'],q_zh:['革命年份？','作者在哪里？'],a_zh:['1830年','德拉克洛瓦（高帽持枪）']}},
+  ],
+};
+
+function eName(ex){return LANG==='en'?ex.name_en:ex.name_zh}
+function eDate(ex){return LANG==='en'?ex.date_en:ex.date_zh}
+function eDesc(ex){return LANG==='en'?ex.desc_en:ex.desc_zh}
+function eDeep(ex){return LANG==='en'?ex.deep_en:ex.deep_zh}
+function eFacts(ex){return LANG==='en'?ex.facts_en:ex.facts_zh}
+function eRel(ex){return ex.rel.map(r=>({id:r.id,name:LANG==='en'?r.name_en:r.name_zh,relation:LANG==='en'?r.r_en:r.r_zh}))}
+function eQuiz(ex){return LANG==='en'?{q:ex.quiz.q_en,a:ex.quiz.a_en}:{q:ex.quiz.q_zh,a:ex.quiz.a_zh}}
+
+function getAllExhibits(){return EXHIBITS[currentMuseum.id]||[]}
+
+// ══════════════════ GAME STATE ══════════════════
+const LEVELS=[{n_en:'Observer',n_zh:'观察者',min:0,max:99},{n_en:'Explorer',n_zh:'探索者',min:100,max:299},{n_en:'Scholar',n_zh:'学者',min:300,max:599},{n_en:'Curator',n_zh:'策展人',min:600,max:9999}];
+const ACHIEVEMENTS=[{id:'first_q',icon:'💬',n_en:'First Question',n_zh:'初次提问',d_en:'Ask your first question',d_zh:'提出第一个问题',c:()=>player.tq>=1},{id:'deep3',icon:'🤔',n_en:'Deep Thinker',n_zh:'深度思考者',d_en:'Depth 3 on any artefact',d_zh:'对任意文物达到深度3',c:()=>Object.values(player.ed).some(d=>d>=3)},{id:'coll3',icon:'📚',n_en:'Codex Novice',n_zh:'图鉴新人',d_en:'3 Codex entries',d_zh:'收集3条图鉴',c:()=>player.collected.length>=3},{id:'coll7',icon:'🏛️',n_en:'Museum Scholar',n_zh:'博物馆学者',d_en:'7 Codex entries',d_zh:'收集7条图鉴',c:()=>player.collected.length>=7},{id:'coll_all',icon:'👑',n_en:'Master Curator',n_zh:'大师策展人',d_en:'Complete the Codex',d_zh:'完成全部图鉴',c:()=>{const all=getAllExhibits();return all.length>0&&player.collected.length>=all.length}},{id:'streak5',icon:'🔥',n_en:'On Fire',n_zh:'势不可挡',d_en:'5 questions in one session',d_zh:'单次连续5问',c:()=>player.streak>=5},{id:'scholar',icon:'🎓',n_en:'Scholar Rank',n_zh:'学者等级',d_en:'Reach Scholar',d_zh:'达到学者',c:()=>player.xp>=300},{id:'quiz3',icon:'🧠',n_en:'Quiz Master',n_zh:'问答大师',d_en:'Complete 3 quizzes',d_zh:'完成3次测验',c:()=>player.qz>=3}];
+let player={xp:0,tq:0,streak:0,qz:0,collected:[],ed:{},achievements:[]};
+
+function getLevel(){for(let i=LEVELS.length-1;i>=0;i--)if(player.xp>=LEVELS[i].min)return LEVELS[i];return LEVELS[0]}
+function lvName(l){return LANG==='en'?l.n_en:l.n_zh}
+function xpNext(){const l=getLevel();return l.max===9999?l.min:l.max+1}
+function addXP(amt){
+  const ol=getLevel();player.xp+=amt;player.streak++;const nl=getLevel();
+  updateProfileXP();
+  if(nl.min>ol.min)showLevelUp(lvName(nl));
+  if(player.xp>=300)renderChatModes();
+}
+function collectEx(id){if(!player.collected.includes(id)){player.collected.push(id);updateCollectCount();showAchievement('📖',t('codex_unlock'),'')}}
+function incDepth(id){player.ed[id]=(player.ed[id]||0)+1;if(player.ed[id]>=3)collectEx(id)}
+function checkAch(){
+  for(const a of ACHIEVEMENTS){if(!player.achievements.includes(a.id)&&a.c()){player.achievements.push(a.id);showAchievement(a.icon,t('ach_new'),LANG==='en'?a.n_en:a.n_zh)}}
+}
+function showAchievement(icon,title,sub){
+  const el=document.getElementById('ach-popup');el.querySelector('.ap-icon').textContent=icon;el.querySelector('.ap-title').textContent=title;el.querySelector('.ap-sub').textContent=sub;
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
+}
+function showLevelUp(title){const el=document.getElementById('level-up');el.querySelector('.level-up-text').textContent=title;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+
+// ══════════════════ APP STATE ══════════════════
+let currentTab='discover',currentExhibit=null,currentMode='explore',isTyping=false,chatHistory=[],recentExhibits=[];
+let viewedIds=[];
+
+// ══════════════════ TAB SWITCHING ══════════════════
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelector(`.tab-item[data-tab="${tab}"]`).classList.add('active');
+  if(tab==='discover')renderDiscover();
+  if(tab==='collection')renderCollection();
+  if(tab==='profile')renderProfile();
+}
+document.querySelectorAll('.tab-item').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+
+// ══════════════════ MUSEUM SELECTOR ══════════════════
+function renderMuseumSelector(){
+  const grid=document.getElementById('museumGrid');
+  const sl={open:{en:t('open'),zh:t('open'),cls:'open'},coming_soon:{en:t('soon'),zh:t('soon'),cls:'soon'},planned:{en:t('planned'),zh:t('planned'),cls:'planned'}};
+  const ttl=document.querySelector('.selector-title'), sub=document.querySelector('.selector-sub');
+  if(ttl)ttl.textContent=t('sel_title');if(sub)sub.textContent=t('sel_sub');
+  grid.innerHTML=MUSEUMS.map(m=>{
+    const s=sl[m.status];const locked=m.status!=='open';
+    return `<div class="m-card ${locked?'locked':''}" data-id="${m.id}" onclick="${locked?'':'selectMuseum(\''+m.id+'\')'}">
+      <div class="mc-region">${LANG==='en'?m.region_en:m.region_zh}</div><div class="mc-icon">${m.icon}</div><div class="mc-info">
+      <div class="mc-name">${LANG==='en'?m.name_en:m.name_zh}<span class="mc-badge ${s.cls}">${s[LANG]}</span></div>
+      <div class="mc-loc">${LANG==='en'?m.loc_en:m.loc_zh}</div>
+      <div class="mc-desc">${LANG==='en'?m.desc_en:m.desc_zh}</div></div></div>`;
+  }).join('');
+}
+function selectMuseum(id){
+  currentMuseum=MUSEUMS.find(m=>m.id===id);
+  document.getElementById('museum-selector').classList.remove('show');
+  document.getElementById('headerMuseum').textContent=LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh;
+  currentExhibit=null;chatHistory=[];
+  renderDiscover();renderChat();renderCollection();renderProfile();
+}
+function showMuseumSelector(){
+  toggleModal('settings-modal');
+  document.getElementById('museum-selector').classList.add('show');
+}
+
+// ══════════════════ DISCOVER TAB ══════════════════
+function renderDiscover(){
+  if(!currentMuseum){document.getElementById('tab-discover').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
+  const ex=getAllExhibits();if(ex.length===0)return;
+  const daily=ex[Math.floor(Math.random()*ex.length)];
+  const depthSum=Object.values(player.ed).reduce((a,b)=>a+b,0);
+  const depthCount=Object.keys(player.ed).length;
+  const avgDepth=depthCount>0?(depthSum/depthCount).toFixed(1):'0.0';
+
+  let html=`
+  <div class="hero-card">
+    <div class="hero-ribbon">${daily.icon}</div>
+    <div class="hero-greeting">${t('disc_daily')}</div>
+    <div class="hero-artefact">${eName(daily)}</div>
+    <div class="hero-meta">${eDate(daily)} · ${daily.mat}</div>
+    <div class="hero-desc">${eDesc(daily).slice(0,120)}...</div>
+    <button class="hero-btn" onclick="selectExhibitAndChat('${daily.id}')">${t('disc_explore')} →</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value blue">${player.xp}</div><div class="stat-label">${t('stat_insight')}</div></div>
+    <div class="stat-card"><div class="stat-value gold">${player.collected.length}/${ex.length}</div><div class="stat-label">${t('stat_codex')}</div></div>
+    <div class="stat-card"><div class="stat-value">${avgDepth}</div><div class="stat-label">${t('stat_depth')}</div></div>
+  </div>`;
+
+  if(recentExhibits.length>0){
+    html+=`<div class="section-header"><span class="section-title">${t('disc_recent')}</span></div><div class="h-scroll">`;
+    recentExhibits.forEach(e=>{
+      html+=`<div class="artefact-card" onclick="selectExhibitAndChat('${e.id}')">
+        <div class="ac-icon">${e.icon}</div><div class="ac-name">${eName(e)}</div><div class="ac-date">${eDate(e)}</div>
+        ${player.collected.includes(e.id)?'<div class="ac-collected">📖 Codex</div>':''}
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  html+=`<div class="section-header"><span class="section-title">${t('disc_hot')}</span></div><div class="h-scroll">`;
+  ex.forEach(e=>{
+    html+=`<div class="artefact-card" onclick="selectExhibitAndChat('${e.id}')">
+      <div class="ac-icon">${e.icon}</div><div class="ac-name">${eName(e)}</div><div class="ac-date">${eDate(e)}</div>
+      ${player.collected.includes(e.id)?'<div class="ac-collected">📖 Codex</div>':''}
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('tab-discover').innerHTML=html;
+}
+
+function selectExhibitAndChat(id){
+  const ex=getAllExhibits().find(e=>e.id===id);if(!ex)return;
+  if(!viewedIds.includes(id)){viewedIds.push(id);recentExhibits=[ex,...recentExhibits.filter(e=>e.id!==id)].slice(0,5)}
+  currentExhibit=ex;chatHistory=[];
+  switchTab('chat');renderChat();renderChatModes();startExhibitConv();
+}
+
+// ══════════════════ CHAT TAB ══════════════════
+function renderChatModes(){
+  const bar=document.getElementById('chat-mode-bar-inner');
+  if(!bar)return;
+  bar.innerHTML=`
+    <button class="mode-pill active" data-mode="explore">${t('mode_explore')}</button>
+    <button class="mode-pill" data-mode="narrate">${t('mode_narrate')}</button>
+    <button class="mode-pill ${player.xp<300?'locked':''}" data-mode="debate">${t('mode_debate')}${player.xp<300?' 🔒':''}</button>
+    <button class="mode-pill" data-mode="children">${t('mode_children')}</button>`;
+  document.querySelectorAll('#chat-mode-bar-inner .mode-pill:not(.locked)').forEach(b=>b.addEventListener('click',()=>switchMode(b.dataset.mode)));
+  const locked=bar.querySelector('.locked');if(locked)locked.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();addBotMsg(t('debate_locked'))});
+}
+function switchMode(mode){currentMode=mode;renderChatModes();document.querySelectorAll('#chat-mode-bar-inner .mode-pill').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(currentExhibit)addBotMsg(modeIntro());}
+function modeIntro(){
+  const e=currentExhibit;
+  if(LANG==='en'){
+    if(currentMode==='explore')return`<em>Take a moment with ${eName(e)}. What do you notice first?</em>`;
+    if(currentMode==='narrate')return`Let me walk you through ${eName(e)} — interrupt anytime.`;
+    if(currentMode==='debate')return`Let's wrestle with ${eName(e)}. I'll challenge your assumptions.`;
+    if(currentMode==='children')return`Hi! Meet my friend <strong>${eName(e)}</strong> — it's over 500 years old! ${e.icon}<br>Secret: ${eFacts(e)[0]}`;
+  }else{
+    if(currentMode==='explore')return`<em>慢慢来。你最先注意到了${eName(e)}的什么？</em>`;
+    if(currentMode==='narrate')return`让我为你讲解${eName(e)}——随时可以打断。`;
+    if(currentMode==='debate')return`来辩论${eName(e)}——我会挑战你的假设。`;
+    if(currentMode==='children')return`嘿！来认识<strong>${eName(e)}</strong>——已经500多岁了！${e.icon}<br>秘密：${eFacts(e)[0]}`;
+  }
+  return '';
+}
+function renderChat(){
+  const ex=getAllExhibits();if(!currentMuseum||ex.length===0){
+    document.getElementById('tab-chat').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return;
+  }
+  let chips='';ex.forEach(e=>{chips+=`<span class="exhibit-chip${currentExhibit&&currentExhibit.id===e.id?' active':''}" onclick="selectExhibitAndChat('${e.id}')">${e.icon} ${eName(e)}</span>`});
+  document.getElementById('tab-chat').innerHTML=`
+    <div class="chat-mode-bar" id="chat-mode-bar-inner"></div>
+    <div class="chat-exhibit-bar">${chips}</div>
+    <div id="chat-messages">
+      <div class="msg bot"><div class="msg-avatar">🏛️</div><div class="msg-content">${t('chat_welcome')}</div></div>
+    </div>
+    <div class="quick-actions">
+      <button class="qa-btn" onclick="quickAction('deeper')">${t('qa_deeper')}</button>
+      <button class="qa-btn" onclick="quickAction('angle')">${t('qa_angle')}</button>
+      <button class="qa-btn" onclick="quickAction('quiz')">${t('qa_quiz')}</button>
+      <button class="qa-btn" onclick="quickAction('relate')">${t('qa_relate')}</button>
+    </div>
+    <div class="chat-input-wrap">
+      <input id="chat-input" placeholder="${t('chat_placeholder')}" onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="chat-send" onclick="sendMsg()">↑</button>
+    </div>`;
+  renderChatModes();
+}
+
+async function startExhibitConv(){
+  const e=currentExhibit;
+  const card=`<div class="ec"><div class="ec-h"><span class="ec-icon">${e.icon}</span><div><div class="ec-name">${eName(e)}</div><div class="ec-meta">${eDate(e)} · ${e.mat}</div></div></div><div class="ec-desc">${eDesc(e)}</div></div>`;
+  addBotMsg(card);showTyping();
+  const intro=LANG==='en'?`Introduce ${eName(e)} to me naturally, as if I'm standing in front of it.`: `向我自然地介绍${eName(e)}，就像我正站在它面前一样。`;
+  chatHistory=[{role:'user',content:intro}];
+  const resp=await generateResp(intro);
+  hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);
+}
+
+function addUserMsg(text){renderMsg('user',text);}
+function addBotMsg(text){renderMsg('bot',text);}
+function renderMsg(role,text){
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  div.innerHTML=`<div class="msg-avatar">${role==='user'?'👤':'🏛️'}</div><div class="msg-content">${text}</div>`;
+  const msgs=document.getElementById('chat-messages');if(!msgs)return;msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping(){
+  isTyping=true;const div=document.createElement('div');div.className='msg bot';div.id='typing-ind';
+  div.innerHTML=`<div class="msg-avatar">🏛️</div><div class="msg-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  const msgs=document.getElementById('chat-messages');if(msgs){msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;}
+}
+function hideTyping(){isTyping=false;const el=document.getElementById('typing-ind');if(el)el.remove();}
+
+async function sendMsg(){
+  const input=document.getElementById('chat-input');if(!input)return;
+  const text=input.value.trim();if(!text||isTyping||!currentExhibit)return;
+  input.value='';addUserMsg(text);chatHistory.push({role:'user',content:text});
+  player.tq++;addXP(5+Math.floor(Math.random()*15));incDepth(currentExhibit.id);checkAch();
+  showTyping();
+  const resp=await generateResp(text);
+  hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);
+}
+
+async function quickAction(act){
+  if(!currentExhibit||isTyping)return;let msg='';
+  if(currentMode==='debate')msg=LANG==='en'?'Challenge my understanding of this.':`挑战我对${eName(currentExhibit)}的理解。`;
+  else if(act==='deeper')msg=LANG==='en'?'Tell me everything about this artefact.':`把${eName(currentExhibit)}的一切都告诉我。`;
+  else if(act==='angle')msg=LANG==='en'?'What perspective do most visitors miss?':'大多数参观者会忽略什么？';
+  else if(act==='quiz')msg=LANG==='en'?'Quiz me!':'测试我！';
+  else msg=LANG==='en'?'How does this connect to other treasures?':'它和别的文物有什么联系？';
+  addUserMsg(msg);chatHistory.push({role:'user',content:msg});
+  player.tq++;addXP(8+Math.floor(Math.random()*12));incDepth(currentExhibit.id);
+  showTyping();
+  const resp=await generateResp(msg);
+  hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);checkAch();
+}
+
+const AI_WORKER_URL='https://muse-api.h7walker.workers.dev'; // deployed Muse AI backend
+
+async function generateResp(userMsg){
+  if(!AI_WORKER_URL.includes('YOUR-SUBDOMAIN')){try{
+    const resp=await fetch(AI_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chatHistory.slice(-8),exhibit:currentExhibit,mode:currentMode,lang:LANG,museum:LANG==='en'?(currentMuseum?currentMuseum.name_en:'British Museum'):(currentMuseum?currentMuseum.name_zh:'大英博物馆')})});
+    if(resp.ok){const d=await resp.json();if(d.response)return d.response.replace(/\n/g,'<br>')}
+  }catch(e){console.warn('AI Worker unreachable, using fallback:',e.message)}}
+  return generateFallback(userMsg);
+}
+function generateFallback(userMsg){
+  const e=currentExhibit;const facts=eFacts(e);const deep=eDeep(e);const desc=eDesc(e);
+  const bank=LANG==='en'?[`${desc.slice(0,120)}...<br><br><em>What catches your eye first?</em>`,`${facts[0]}<br><br><em>Did you know that? Shall we go deeper?</em>`,`${deep}<br><br>Every layer reveals another mystery.`]:[`${desc.slice(0,120)}……<br><br><em>你第一眼注意到了什么？</em>`,`${facts[0]}<br><br><em>你知道吗？想再深挖一层吗？</em>`,`${deep}<br><br>每一层都藏着新的谜。`];
+  return bank[Math.floor(Math.random()*bank.length)];
+}
+
+// ══════════════════ COLLECTION TAB ══════════════════
+let collectionFilter='all';
+function setCollectionFilter(f){collectionFilter=f;renderCollection();}
+function renderCollection(){
+  if(!currentMuseum){document.getElementById('tab-collection').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
+  const ex=getAllExhibits();if(ex.length===0)return;
+  const coll=player.collected.length;
+  let html=`
+  <div class="c-progress"><div class="cp-icon">📚</div><div class="cp-info"><div class="cp-title">${t('coll_title')}</div><div class="cp-count">${coll} / ${ex.length}</div><div class="cp-bar"><div class="cp-bar-inner" style="width:${ex.length>0?(coll/ex.length)*100:0}%"></div></div></div></div>
+  <div class="collection-filter">
+    <button class="f-pill${collectionFilter==='all'?' active':''}" onclick="setCollectionFilter('all')">${t('coll_all')} (${ex.length})</button>
+    <button class="f-pill${collectionFilter==='collected'?' active':''}" onclick="setCollectionFilter('collected')">${t('coll_collected')} (${coll})</button>
+    <button class="f-pill${collectionFilter==='pending'?' active':''}" onclick="setCollectionFilter('pending')">${t('coll_pending')} (${ex.length-coll})</button>
+  </div>
+  <div class="collection-grid">`;
+  const filtered=collectionFilter==='collected'?ex.filter(e=>player.collected.includes(e.id)):collectionFilter==='pending'?ex.filter(e=>!player.collected.includes(e.id)):ex;
+  filtered.forEach(e=>{
+    const locked=!player.collected.includes(e.id)&&collectionFilter!=='all';
+    html+=`<div class="c-item${locked?' locked':''}" onclick="selectExhibitAndChat('${e.id}')">
+      ${player.collected.includes(e.id)?'<div class="c-item-badge">📖</div>':''}
+      <div class="c-item-icon">${e.icon}</div>
+      <div class="c-item-name">${eName(e)}</div>
+      <div class="c-item-meta">${eDate(e)}</div>
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('tab-collection').innerHTML=html;
+}
+function updateCollectCount(){if(currentTab==='collection')renderCollection();renderDiscover();renderProfile();}
+
+// ══════════════════ PROFILE TAB ══════════════════
+function renderProfile(){
+  if(!currentMuseum){document.getElementById('tab-profile').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
+  const l=getLevel();const nxt=xpNext();const current=l.min;
+  const pct=l.max===9999?100:Math.min(100,((player.xp-current)/(nxt-current))*100);
+  const ex=getAllExhibits();const coll=player.collected.length;
+  let achHtml='';ACHIEVEMENTS.forEach(a=>{
+    achHtml+=`<div class="ach-badge ${player.achievements.includes(a.id)?'unlocked':'locked'}">${a.icon}<div class="ach-badge-name">${LANG==='en'?a.n_en:a.n_zh}</div></div>`;
+  });
+  document.getElementById('tab-profile').innerHTML=`
+  <div class="profile-card">
+    <div class="pc-avatar">🏛️</div>
+    <div class="pc-info"><div class="pc-name">${LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh}</div><div class="pc-level">${lvName(l)} · ${coll}/${ex.length} Codex</div></div>
+  </div>
+  <div class="profile-card"><div class="pc-info"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:var(--text-dim)">Insight XP</span><span style="font-size:11px;color:var(--text-dim)" id="profileXpText">${player.xp} / ${nxt}</span></div><div class="pc-xp-bar"><div class="pc-xp-inner" id="profileXpInner" style="width:${pct}%"></div></div></div></div>
+  <div class="section-header"><span class="section-title">${t('prof_ach')}</span></div>
+  <div class="ach-preview">${achHtml}</div>
+  <div class="profile-nav" style="margin-top:16px">
+    <div class="p-nav-item" onclick="showMuseumSelector()"><span class="p-nav-icon">🏛️</span><span class="p-nav-label">${t('prof_museum_switch')}</span><span class="p-nav-arrow">→</span></div>
+    <div class="p-nav-item" onclick="openAchModal()"><span class="p-nav-icon">🏆</span><span class="p-nav-label">${t('prof_ach')}</span><span class="p-nav-arrow">→</span></div>
+    <div class="p-nav-item" onclick="toggleModal('settings-modal')"><span class="p-nav-icon">⚙️</span><span class="p-nav-label">${t('prof_settings')}</span><span class="p-nav-arrow">→</span></div>
+    <div class="p-nav-item" onclick="toggleModal('about-modal')"><span class="p-nav-icon">ℹ️</span><span class="p-nav-label">${t('prof_about')}</span><span class="p-nav-arrow">→</span></div>
+  </div>`;
+  // Add about modal if not exists
+  if(!document.getElementById('about-modal')){
+    const div=document.createElement('div');div.className='modal-overlay';div.id='about-modal';
+    div.innerHTML=`<div class="modal-inner"><div class="modal-title">About Muse</div><div style="font-size:13px;line-height:1.7;color:var(--text-mid)">${t('prof_about_text')}</div><button class="modal-close" onclick="toggleModal('about-modal')">Close</button></div>`;
+    document.body.appendChild(div);
+  }
+}
+function updateProfileXP(){
+  if(currentTab!=='profile')return;
+  const l=getLevel();const nxt=xpNext();const current=l.min;
+  const pct=l.max===9999?100:Math.min(100,((player.xp-current)/(nxt-current))*100);
+  const el=document.getElementById('profileXpInner');if(el)el.style.width=pct+'%';
+  const txt=document.getElementById('profileXpText');if(txt)txt.textContent=player.xp+' / '+nxt;
+}
+
+function openAchModal(){
+  const modal=document.getElementById('ach-modal');const list=document.getElementById('ach-list');
+  modal.querySelector('.modal-title').textContent=t('prof_ach');
+  list.innerHTML=ACHIEVEMENTS.map(a=>{
+    const u=player.achievements.includes(a.id);return `<div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);opacity:${u?1:0.35}">
+      <span style="font-size:22px">${a.icon}</span><div><div style="font-size:13px;font-weight:600">${LANG==='en'?a.n_en:a.n_zh} ${u?'✅':''}</div><div style="font-size:11px;color:var(--text-dim)">${LANG==='en'?a.d_en:a.d_zh}</div></div></div>`;
+  }).join('');
+  toggleModal('ach-modal');
+}
+
+function toggleModal(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
+function resetProgress(){player={xp:0,tq:0,streak:0,qz:0,collected:[],ed:{},achievements:[]};recentExhibits=[];toggleModal('settings-modal');renderDiscover();renderCollection();renderProfile();renderChat();}
+
+// ══════════════════ INIT ══════════════════
+function init(){
+  spawnParticles();renderMuseumSelector();
+  setTimeout(()=>{document.getElementById('loading').classList.add('hidden');setTimeout(()=>document.getElementById('museum-selector').classList.add('show'),400)},2200);
+}
+init();
+</script>
+</body>
+</html>
