@@ -80,13 +80,46 @@ RULES:
     const tempMap = { explore: 0.7, narrate: 0.85, debate: 0.95, children: 0.8 };
     const temperature = tempMap[mode] || 0.7;
 
-    const result = await env.AI.run('@cf/meta/llama-3.2-3b-instruct', {
-      messages: fullMessages,
-      temperature: temperature,
-      max_tokens: 500,
+    const apiKey = env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'DEEPSEEK_API_KEY not configured' }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        }
+      });
+    }
+
+    const aiResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: fullMessages,
+        temperature: temperature,
+        max_tokens: 500,
+      }),
     });
 
-    return new Response(JSON.stringify({ response: result.response }), {
+    const aiResult = await aiResponse.json();
+
+    if (!aiResponse.ok) {
+      return new Response(JSON.stringify({ error: aiResult.error?.message || 'AI API error' }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        }
+      });
+    }
+
+    const reply = aiResult.choices?.[0]?.message?.content || '';
+
+    return new Response(JSON.stringify({ response: reply }), {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
