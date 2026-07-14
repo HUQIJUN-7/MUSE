@@ -372,50 +372,7 @@ body{
     <div class="tab-pane" id="tab-chat"></div>
     <div class="tab-pane" id="tab-collection"></div>
     <div class="tab-pane" id="tab-profile"></div>
-    <div class="tab-pane" id="tab-story" style="overflow-y:auto;padding:0;">
-      <div style="text-align:center;padding:60px 20px 40px;">
-        <div style="font-size:42px;font-weight:700;letter-spacing:-0.02em;color:var(--gold);margin-bottom:24px;">The Muse</div>
-        <div style="font-size:18px;color:var(--text-dim);max-width:640px;margin:0 auto;line-height:1.7;">
-          让 AI 引导你去"看"和"思考"<br>而不是去"读"和"背"
-        </div>
-      </div>
-      <div style="max-width:720px;margin:0 auto;padding:0 20px;">
-        <div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">
-          <div style="font-size:28px;margin-bottom:8px;">🏛️</div>
-          <div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">为什么逛博物馆总觉得自己"没看懂"？</div>
-          <div style="font-size:15px;color:var(--text-dim);line-height:1.8;">
-            你站在罗塞塔石碑前。展签写着"公元前196年，托勒密五世，花岗闪长岩"。你拍了张照。然后呢？你不知道该看什么。<br><br>
-            传统博物馆的信息传达陷入两极：要么是几行干瘪的标签，要么是密密麻麻的学术论文。无论哪种，都是单向灌输——你被动接收，工作记忆瞬间过载，走出展厅就全忘了。你没有"看懂"，你只是"读到了"。
-          </div>
-        </div>
-        <div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">
-          <div style="font-size:28px;margin-bottom:8px;">🤖</div>
-          <div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">AI 不是"百科全书"，而是一个会反问你的引路人</div>
-          <div style="font-size:15px;color:var(--text-dim);line-height:1.8;">
-            The Muse 不做知识的倾倒者。它是一位苏格拉底式的对话伙伴。<br><br>
-            拍下文物，AI 不会立刻吐出一篇维基百科。它会先问你："你注意到的第一件事是什么？"——然后顺着你独特的观察，一步步搭建理解的阶梯。<br><br>
-            <span style="color:var(--gold);font-weight:500;">每个游客的起点不同，AI 的引导路径也不同。</span>如果你被色彩打动，它就从颜料和技法切入；如果你好奇人物的表情，它就从叙事和象征聊起。没有标准答案，没有固定路线——AI 从你的第一反应出发，带着你走出只属于你自己的那条理解路径。<br><br>
-            这是教育学家 Louis 教授所说的"对话空间"（Dialogic Space）：不是把知识塞进你的脑子，而是从你已有的认知和感受出发，帮你主动建构意义。知识是你自己"长出来"的，不是别人灌进去的。
-          </div>
-        </div>
-        <div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">
-          <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
-          <div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">为什么我们故意"阉割"了 AI？</div>
-          <div style="font-size:15px;color:var(--text-dim);line-height:1.8;">
-            大语言模型有一个危险的副产品：它说话太流畅、太笃定了。这种"认知权威"（Epistemic Authority）会让游客放弃思考——AI 说什么就是什么。<br><br>
-            所以在 The Muse 里，我们用提示词工程给 AI 套上了缰绳：它被禁止直接给出美学结论或历史定论。它只能说"试着从这个角度看"，不能说"这是最伟大的作品"。最终的解释权，永远留给你。<br><br>
-            因为在博物馆里，最重要的不是答案，是你自己产生的那个问题。
-          </div>
-        </div>
-        <div style="text-align:center;padding:40px 0 60px;border-top:1px solid var(--border);margin-top:16px;">
-          <div style="font-size:13px;color:var(--text-dim);max-width:480px;margin:0 auto;line-height:1.8;">
-            一个在数字时代探索博物馆新可能的设计实验。<br>
-            The Muse 源于一个简单的问题：如果技术和文物之间，还站着一个人——一个有好奇心、会困惑、想要真正"看懂"的普通人——我们该给他什么？<br><br>
-            答案不是更多的信息。<br>而是一次真正的对话。一次属于他自己的思考旅程。
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="tab-pane" id="tab-story" style="overflow-y:auto;padding:0;"></div>
   </div>
   <div id="tab-bar">
     <button class="tab-item active" data-tab="discover"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-discover"/></svg><span class="tab-label">Discover</span></button>
@@ -478,7 +435,7 @@ function t(k){return I18N[LANG][k]||k}
 function switchLang(l){
   LANG=l;document.querySelectorAll('.h-btn').forEach(b=>b.classList.toggle('active',(b.textContent.trim()===(l==='en'?'EN':'中'))));
   document.querySelectorAll('.tab-item').forEach(b=>{const tb=b.dataset.tab;if(tb)b.querySelector('.tab-label').textContent=t('tab_'+tb)});
-  renderMuseumSelector();renderDiscover();renderChat();renderCollection();renderProfile();
+  renderMuseumSelector();renderDiscover();renderChat();renderCollection();renderProfile();renderStory();
 }
 
 // ══════════════════ MUSEUM DATA ══════════════════
@@ -691,7 +648,7 @@ function selectMuseum(id){
   document.getElementById('museum-selector').classList.remove('show');
   document.getElementById('headerMuseum').textContent=LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh;
   currentExhibit=null;chatHistory=[];
-  renderDiscover();renderChat();renderCollection();renderProfile();
+  renderDiscover();renderChat();renderCollection();renderProfile();renderStory();
 }
 function showMuseumSelector(){toggleModal('settings-modal');document.getElementById('museum-selector').classList.add('show')}
 
@@ -891,6 +848,61 @@ function renderCollection(){
 function updateCollectCount(){if(currentTab==='collection')renderCollection();renderDiscover();renderProfile()}
 
 // ══════════════════ PROFILE ══════════════════
+// ══════════════════ STORY TAB ══════════════════
+function renderStory(){
+  const en=(LANG==='en');
+  const h=document.getElementById('tab-story');
+  h.innerHTML='<div style="text-align:center;padding:60px 20px 40px;">'
+    +'<div style="font-size:42px;font-weight:700;letter-spacing:-0.02em;color:var(--gold);margin-bottom:24px;">The Muse</div>'
+    +'<div style="font-size:18px;color:var(--text-dim);max-width:640px;margin:0 auto;line-height:1.7;">'
+    +(en
+      ?'AI that guides you to <span style="color:var(--gold);">see</span> and <span style="color:var(--gold);">think</span><br>not to read and recite'
+      :'让 AI 引导你去<span style="color:var(--gold);">"看"</span>和<span style="color:var(--gold);">"思考"</span><br>而不是去"读"和"背"')
+    +'</div></div>'
+    +'<div style="max-width:720px;margin:0 auto;padding:0 20px;">'
+    // Card 1
+    +'<div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">'
+    +'<div style="font-size:28px;margin-bottom:8px;">🏛️</div>'
+    +'<div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">'
+    +(en?'Why do museums leave you feeling like you "didn\'t really get it"?':'为什么逛博物馆总觉得自己"没看懂"？')
+    +'</div>'
+    +'<div style="font-size:15px;color:var(--text-dim);line-height:1.8;">'
+    +(en
+      ?'You\'re standing in front of the Rosetta Stone. The label reads: "196 BC, Ptolemy V, granodiorite." You snap a photo. Then what? You don\'t know what to look at.<br><br>Traditional museums fall into one of two extremes: a few barren lines on a placard, or dense academic papers. Either way, it\'s a one-way broadcast. You\'re a passive receiver. Your working memory overloads within seconds, and by the time you step out of the gallery, you\'ve forgotten everything. You didn\'t "get" anything — you just "read" something.'
+      :'你站在罗塞塔石碑前。展签写着"公元前196年，托勒密五世，花岗闪长岩"。你拍了张照。然后呢？你不知道该看什么。<br><br>传统博物馆的信息传达陷入两极：要么是几行干瘪的标签，要么是密密麻麻的学术论文。无论哪种，都是单向灌输——你被动接收，工作记忆瞬间过载，走出展厅就全忘了。你没有"看懂"，你只是"读到了"。')
+    +'</div></div>'
+    // Card 2
+    +'<div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">'
+    +'<div style="font-size:28px;margin-bottom:8px;">🤖</div>'
+    +'<div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">'
+    +(en?'AI isn\'t an encyclopedia — it\'s a guide who asks <em>you</em> questions back':'AI 不是"百科全书"，而是一个会反问你的引路人')
+    +'</div>'
+    +'<div style="font-size:15px;color:var(--text-dim);line-height:1.8;">'
+    +(en
+      ?'The Muse doesn\'t dump information on you. It\'s a Socratic dialogue partner.<br><br>When you photograph an artefact, the AI doesn\'t immediately spit out a Wikipedia entry. It starts by asking: "What\'s the first thing you notice?" — and then builds a ladder of understanding from your unique observation, one step at a time.<br><br><span style="color:var(--gold);font-weight:500;">Every visitor starts from a different place, so the AI takes a different path with each one.</span> If colour draws you in, it\'ll talk pigments and technique. If you\'re curious about a figure\'s expression, it\'ll explore narrative and symbolism. No standard answers, no fixed route. The AI meets you where your attention already is and walks you down a path of understanding that\'s yours alone.<br><br>This is what education scholars call "Dialogic Space" — not pouring knowledge into your head, but helping you construct meaning from your own perceptions and feelings. Knowledge grows from within. It\'s not poured in from outside.'
+      :'The Muse 不做知识的倾倒者。它是一位苏格拉底式的对话伙伴。<br><br>拍下文物，AI 不会立刻吐出一篇维基百科。它会先问你："你注意到的第一件事是什么？"——然后顺着你独特的观察，一步步搭建理解的阶梯。<br><br><span style="color:var(--gold);font-weight:500;">每个游客的起点不同，AI 的引导路径也不同。</span>如果你被色彩打动，它就从颜料和技法切入；如果你好奇人物的表情，它就从叙事和象征聊起。没有标准答案，没有固定路线——AI 从你的第一反应出发，带着你走出只属于你自己的那条理解路径。<br><br>这是教育学家所说的"对话空间"（Dialogic Space）：不是把知识塞进你的脑子，而是从你已有的认知和感受出发，帮你主动建构意义。知识是你自己"长出来"的，不是别人灌进去的。')
+    +'</div></div>'
+    // Card 3
+    +'<div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">'
+    +'<div style="font-size:28px;margin-bottom:8px;">⚠️</div>'
+    +'<div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">'
+    +(en?'Why we deliberately put limits on the AI':'为什么我们故意"阉割"了 AI？')
+    +'</div>'
+    +'<div style="font-size:15px;color:var(--text-dim);line-height:1.8;">'
+    +(en
+      ?'Large language models come with a dangerous byproduct: they sound too fluent, too certain. This "epistemic authority" makes visitors stop thinking for themselves — whatever the AI says, goes.<br><br>So in The Muse, we\'ve put prompt engineering reins on the AI: it\'s forbidden from handing down aesthetic verdicts or historical pronouncements. It can say "try looking from this angle," never "this is the greatest masterpiece." The final interpretation always stays with you.<br><br>Because in a museum, the most important thing isn\'t the answer. It\'s the question <em>you</em> come up with yourself.'
+      :'大语言模型有一个危险的副产品：它说话太流畅、太笃定了。这种"认知权威"（Epistemic Authority）会让游客放弃思考——AI 说什么就是什么。<br><br>所以在 The Muse 里，我们用提示词工程给 AI 套上了缰绳：它被禁止直接给出美学结论或历史定论。它只能说"试着从这个角度看"，不能说"这是最伟大的作品"。最终的解释权，永远留给你。<br><br>因为在博物馆里，最重要的不是答案，是你自己产生的那个问题。')
+    +'</div></div>'
+    // Footer
+    +'<div style="text-align:center;padding:40px 0 60px;border-top:1px solid var(--border);margin-top:16px;">'
+    +'<div style="font-size:13px;color:var(--text-dim);max-width:480px;margin:0 auto;line-height:1.8;">'
+    +(en
+      ?'A design experiment exploring what museums can become in the digital age.<br>The Muse began with a simple question: standing between technology and the artefact, there\'s a person — curious, confused, genuinely wanting to understand. What should we give them?<br><br>The answer isn\'t more information.<br>It\'s a real conversation. A journey of thought that belongs to them.'
+      :'一个在数字时代探索博物馆新可能的设计实验。<br>The Muse 源于一个简单的问题：如果技术和文物之间，还站着一个人——一个有好奇心、会困惑、想要真正"看懂"的普通人——我们该给他什么？<br><br>答案不是更多的信息。<br>而是一次真正的对话。一次属于他自己的思考旅程。')
+    +'</div></div>'
+    +'</div>';
+}
+
 function renderProfile(){
   if(!currentMuseum){document.getElementById('tab-profile').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
   const l=getLevel();const nxt=xpNext();const current=l.min;
