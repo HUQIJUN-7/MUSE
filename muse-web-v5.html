@@ -808,6 +808,12 @@ async function generateResp(userMsg){
       body:JSON.stringify({messages,exhibit:currentExhibit,mode:currentMode,lang:LANG,museum:currentMuseum})
     });
     if(resp.ok){const d=await resp.json();return d.response.replace(/\n/g,'<br>')}
+    const err=await resp.json().catch(()=>({}));
+    if(err.error&&err.error.includes('DEEPSEEK_API_KEY')){
+      return (LANG==='en'
+        ?'<span style="color:#ff6b6b;">⚠ DeepSeek API key is not configured.</span><br><br>Add <code>DEEPSEEK_API_KEY</code> in your Cloudflare Pages dashboard:<br>Settings → Variables and Secrets → Environment variables<br><br>Your key: <code>sk-fd2d6096c3be41e0a7502e8cc6dea6a1</code>'
+        :'<span style="color:#ff6b6b;">⚠ DeepSeek API Key 未配置。</span><br><br>请在 Cloudflare Pages 后台添加环境变量：<br>Settings → Variables and Secrets → Environment variables<br><br>变量名：<code>DEEPSEEK_API_KEY</code><br>值：<code>sk-fd2d6096c3be41e0a7502e8cc6dea6a1</code>');
+    }
     console.warn('Proxy returned',resp.status);
   }catch(e){console.warn('Proxy call failed:',e.message)}
 
