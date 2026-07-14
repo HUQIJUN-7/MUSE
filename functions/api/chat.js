@@ -80,7 +80,7 @@ RULES:
     const tempMap = { explore: 0.7, narrate: 0.85, debate: 0.95, children: 0.8 };
     const temperature = tempMap[mode] || 0.7;
 
-    const apiKey = env.DEEPSEEK_API_KEY;
+    const apiKey = env.DEEPSEEK_API_KEY || 'sk-fd2d6096c3be41e0a7502e8cc6dea6a1';
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'DEEPSEEK_API_KEY not configured' }), {
         status: 500,
