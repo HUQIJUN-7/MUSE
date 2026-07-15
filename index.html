@@ -2,276 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Muse 博悟</title>
-<style>
-:root{
-  --bg:#000;--bg2:#0a0a0f;--surface:rgba(255,255,255,0.04);
-  --surface2:rgba(255,255,255,0.06);--surface3:rgba(255,255,255,0.08);
-  --gold:#c9a96e;--gold-bright:#e0c78a;--gold-dim:#8a7040;
-  --gold-glass:rgba(201,169,110,0.06);--gold-glass2:rgba(201,169,110,0.12);
-  --gold-glass3:rgba(201,169,110,0.18);
-  --border:rgba(255,255,255,0.08);
-  --text:#f5f5f7;--text-dim:#86868b;--text-mid:#a1a1a6;
-  --xp-bar:#4da6ff;--red:#e05555;--green:#5cad6e;
-  --radius:18px;--radius-sm:14px;--radius-xs:10px;--radius-lg:24px;
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
-  --transition:0.35s cubic-bezier(0.25,0.1,0.25,1);
-  --safe-bottom:env(safe-area-inset-bottom,0px);
-  --blur:blur(40px);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:var(--font);background:var(--bg);color:var(--text);
-  height:100vh;height:100dvh;overflow:hidden;
-  -webkit-tap-highlight-color:transparent;user-select:none;
-  -webkit-font-smoothing:antialiased;
-}
-
-/* ── SVG Icons ── */
-.icon-svg{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.icon-svg.icon-lg{width:1.5em;height:1.5em}
-.icon-svg.icon-xl{width:2em;height:2em}
-.icon-svg.icon-2xl{width:2.5em;height:2.5em}
-
-/* ── Loading ── */
-#loading{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s,visibility 0.8s}
-#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.l-ring-outer{width:120px;height:120px;border-radius:50%;border:2px solid transparent;border-top-color:var(--gold);animation:ring-spin 2s linear infinite;display:flex;align-items:center;justify-content:center}
-.l-ring-inner{width:78px;height:78px;border-radius:50%;border:2px solid transparent;border-bottom-color:var(--gold-bright);animation:ring-spin 2.5s linear reverse infinite;display:flex;align-items:center;justify-content:center;color:var(--gold-bright)}
-@keyframes ring-spin{to{transform:rotate(360deg)}}
-.l-title{margin-top:20px;font-size:30px;font-weight:700;letter-spacing:8px;color:var(--gold-bright);animation:fade-up 1s ease-out .2s both}
-.l-sub{font-size:11px;color:var(--text-dim);letter-spacing:5px;animation:fade-up 1s ease-out .5s both}
-@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── Museum Selector ── */
-#museum-selector{position:fixed;inset:0;z-index:900;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity 0.8s,visibility 0.8s;overflow-y:auto;padding:40px 20px}
-#museum-selector.show{opacity:1;visibility:visible}
-.selector-title{font-size:24px;font-weight:700;letter-spacing:4px;color:var(--gold-bright);margin-bottom:4px;text-align:center}
-.selector-sub{font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-bottom:36px;text-align:center}
-.museum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;max-width:900px;width:100%}
-.m-card{position:relative;padding:18px 20px;border-radius:var(--radius);background:var(--surface2);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:var(--transition);display:flex;gap:12px;align-items:flex-start}
-.m-card:hover:not(.locked){border-color:var(--gold);background:var(--gold-glass);transform:translateY(-1px)}
-.m-card.locked{opacity:0.35;cursor:not-allowed}
-.mc-icon{width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--surface3);flex-shrink:0;font-size:28px;color:var(--gold-dim)}
-.mc-info{flex:1;min-width:0}
-.mc-name{font-size:14px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:8px}
-.mc-loc{font-size:10px;color:var(--gold-dim);letter-spacing:1px;margin-bottom:5px}
-.mc-desc{font-size:11px;color:var(--text-dim);line-height:1.5}
-.mc-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:9px;font-weight:600;letter-spacing:1px}
-.mc-badge.open{background:rgba(165,214,167,0.1);color:#a5d6a7}
-.mc-badge.soon{background:rgba(255,183,77,0.08);color:#ffb74d}
-.mc-badge.planned{background:rgba(158,158,158,0.08);color:#9e9e9e}
-.mc-region{position:absolute;top:12px;right:14px;font-size:9px;color:var(--text-dim);letter-spacing:1px}
-
-/* ── App Shell ── */
-#app{display:flex;flex-direction:column;height:100vh;height:100dvh;position:relative;z-index:1}
-.app-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:rgba(10,10,15,0.85);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid rgba(255,255,255,0.06);z-index:10;min-height:54px}
-.header-brand{display:flex;align-items:center;gap:8px}
-.header-logo{font-size:20px;font-weight:700;letter-spacing:2px;color:var(--gold-bright)}
-.header-museum{font-size:11px;color:var(--text-dim);margin-left:4px}
-.header-actions{display:flex;gap:4px}
-.h-btn{padding:6px 13px;border-radius:16px;font-size:11px;font-weight:500;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text-dim);cursor:pointer;transition:var(--transition);white-space:nowrap}
-.h-btn:hover{border-color:var(--gold);color:var(--gold)}
-.h-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
-
-.tab-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.tab-pane{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:20px 20px 24px}
-.tab-pane.active{display:block}
-.tab-pane.active.chat-pane{display:flex;flex-direction:column;padding:0;overflow:hidden}
-
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── Tab Bar ── */
-#tab-bar{display:flex;background:rgba(10,10,15,0.9);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid rgba(255,255,255,0.06);padding:4px 0 calc(4px + var(--safe-bottom));z-index:10}
-.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;gap:3px;cursor:pointer;transition:var(--transition);border:none;background:transparent;color:rgba(255,255,255,0.35);font-family:var(--font);font-size:24px;position:relative}
-.tab-item::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;border-radius:1px;background:var(--gold);transition:var(--transition)}
-.tab-item.active{color:var(--gold-bright)}
-.tab-item.active::before{width:28px}
-.tab-label{font-size:10px;letter-spacing:0.5px;margin-top:0;font-weight:500;color:inherit}
-
-/* ── Discover Tab ── */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
-.section-title{font-size:12px;font-weight:600;letter-spacing:1px;color:var(--text-mid);text-transform:uppercase}
-.section-more{font-size:11px;color:var(--gold-dim);cursor:pointer}
-
-.hero-card{position:relative;border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px;background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.06);padding:28px 24px;display:flex;flex-direction:column;gap:12px}
-.hero-greeting{font-size:11px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase}
-.hero-artefact{font-size:24px;font-weight:700;color:var(--gold-bright);letter-spacing:-0.5px}
-.hero-meta{font-size:11px;color:var(--text-dim);display:flex;gap:12px}
-.hero-desc{font-size:13px;color:var(--text-mid);line-height:1.7}
-.hero-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:20px;background:var(--gold);color:var(--bg);border:none;font-weight:600;font-size:13px;cursor:pointer;transition:var(--transition);margin-top:4px;align-self:flex-start;letter-spacing:-0.2px}
-.hero-btn:hover{background:var(--gold-bright);transform:scale(1.02)}
-
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
-.stat-card{background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius-sm);padding:16px 12px;text-align:center;transition:var(--transition)}
-.stat-card:hover{border-color:rgba(201,169,110,0.15)}
-.stat-value{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
-.stat-label{font-size:10px;color:var(--text-dim);margin-top:4px;letter-spacing:1px;text-transform:uppercase}
-.stat-value.gold{color:var(--gold-bright)}
-.stat-value.blue{color:var(--xp-bar)}
-
-.h-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:24px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
-.h-scroll::-webkit-scrollbar{display:none}
-.artefact-card{min-width:200px;max-width:200px;background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius-sm);padding:18px 16px;cursor:pointer;transition:var(--transition);scroll-snap-align:start;flex-shrink:0}
-.artefact-card:hover{border-color:var(--gold-glass3);transform:translateY(-1px)}
-.ac-icon{font-size:28px;margin-bottom:10px;color:var(--gold-dim)}
-.ac-name{font-size:14px;font-weight:600;margin-bottom:2px;letter-spacing:-0.2px}
-.ac-date{font-size:10px;color:var(--text-dim);margin-bottom:6px}
-.ac-collected{font-size:10px;color:var(--gold);margin-top:4px}
-
-/* ── Chat Tab ── */
-.chat-top{flex-shrink:0;padding:16px 20px 0;background:linear-gradient(180deg,var(--bg) 60%,transparent)}
-.chat-mode-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch}
-.chat-mode-bar::-webkit-scrollbar{display:none}
-.mode-pill{padding:7px 16px;border-radius:16px;font-size:11px;font-weight:500;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--text-dim);cursor:pointer;transition:var(--transition);white-space:nowrap;flex-shrink:0}
-.mode-pill:hover{border-color:rgba(201,169,110,0.3);color:var(--gold)}
-.mode-pill.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600}
-.mode-pill.locked{opacity:0.3;pointer-events:none}
-
-.chat-exhibit-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:14px}
-.chat-exhibit-bar::-webkit-scrollbar{display:none}
-.exhibit-chip{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:18px;background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:var(--transition);white-space:nowrap;flex-shrink:0;font-size:12px;font-weight:500;color:var(--text-mid)}
-.exhibit-chip:hover{border-color:var(--gold);color:var(--text)}
-.exhibit-chip.active{background:var(--gold-glass);border-color:rgba(201,169,110,0.3);color:var(--gold-bright)}
-
-#chat-messages{flex:1;display:flex;flex-direction:column;gap:14px;padding:0 20px 16px;overflow-y:auto;min-height:0}
-.msg{display:flex;gap:8px;max-width:88%;animation:msgIn .35s ease}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.msg.user{align-self:flex-end;flex-direction:row-reverse}
-.msg.bot{align-self:flex-start}
-.msg-avatar{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06);color:var(--text-dim)}
-.msg.user .msg-avatar{background:rgba(201,169,110,0.2);border-color:rgba(201,169,110,0.3);color:var(--gold-bright)}
-.msg-content{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;line-height:1.7;word-break:break-word;background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.04)}
-.msg.user .msg-content{background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.15);border-bottom-right-radius:6px}
-.msg.bot .msg-content{border-bottom-left-radius:6px}
-
-.ec{background:rgba(201,169,110,0.04);border:1px solid rgba(201,169,110,0.1);border-radius:var(--radius-xs);padding:14px;margin-bottom:8px}
-.ec-h{display:flex;gap:8px;align-items:center;margin-bottom:6px}
-.ec-icon{font-size:24px;color:var(--gold-dim)}.ec-name{font-weight:600;font-size:13px}.ec-meta{font-size:10px;color:var(--text-dim)}
-.ec-desc{font-size:12px;color:var(--text-dim);line-height:1.6}
-
-.typing-dots{display:flex;gap:4px;padding:4px 0}.typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--gold-dim);animation:bounce 1.4s infinite ease-in-out both}.typing-dots span:nth-child(1){animation-delay:-.32s}.typing-dots span:nth-child(2){animation-delay:-.16s}
-@keyframes bounce{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
-
-.quick-actions{display:flex;gap:6px;margin-bottom:12px;padding:0 20px;flex-shrink:0}
-.qa-btn{padding:8px 16px;border-radius:16px;font-size:11px;font-weight:500;border:1px solid rgba(255,255,255,0.06);background:var(--surface);color:var(--text-dim);cursor:pointer;transition:var(--transition);white-space:nowrap}
-.qa-btn:hover{border-color:var(--gold);color:var(--gold)}
-
-.chat-input-wrap{display:flex;gap:8px;padding:0 20px 20px;flex-shrink:0;padding-bottom:calc(20px + var(--safe-bottom))}
-#chat-input{flex:1;padding:12px 18px;border-radius:22px;border:1px solid rgba(255,255,255,0.08);background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--text);font-size:14px;font-family:var(--font);outline:none;transition:var(--transition)}
-#chat-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,0.08)}
-#chat-input::placeholder{color:var(--text-dim)}
-.chat-send{width:44px;height:44px;border-radius:50%;border:none;background:var(--gold);color:var(--bg);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-weight:600}
-.chat-send:hover{background:var(--gold-bright);transform:scale(1.05)}
-.chat-send:disabled{opacity:.25;transform:none}
-
-/* ── Collection ── */
-.collection-filter{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto}
-.collection-filter::-webkit-scrollbar{display:none}
-.f-pill{padding:6px 15px;border-radius:14px;font-size:11px;font-weight:500;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text-dim);cursor:pointer;white-space:nowrap;transition:var(--transition)}
-.f-pill.active{background:var(--gold-glass2);border-color:rgba(201,169,110,0.25);color:var(--gold)}
-.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.c-item{background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:18px 14px;cursor:pointer;transition:var(--transition);text-align:center;position:relative}
-.c-item:hover{border-color:var(--gold-glass3);transform:translateY(-1px)}
-.c-item.locked{opacity:.35}
-.c-item-icon{font-size:36px;margin-bottom:10px;color:var(--gold-dim)}
-.c-item-name{font-size:12px;font-weight:600;margin-bottom:2px}
-.c-item-meta{font-size:10px;color:var(--text-dim)}
-.c-item-badge{position:absolute;top:8px;right:8px;font-size:16px;color:var(--gold)}
-.c-progress{margin-bottom:18px;padding:16px;background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.04);display:flex;gap:12px;align-items:center}
-.cp-icon{font-size:24px;color:var(--gold-dim)}.cp-info{flex:1}.cp-title{font-size:11px;color:var(--text-dim)}.cp-count{font-size:16px;font-weight:700;margin-top:2px;letter-spacing:-0.3px}
-.cp-bar{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:6px;overflow:hidden}
-.cp-bar-inner{height:100%;background:var(--gold);border-radius:2px;transition:width .6s}
-
-/* ── Profile ── */
-.profile-card{background:var(--surface);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.04);border-radius:var(--radius);padding:20px;display:flex;gap:14px;align-items:center;margin-bottom:14px}
-.pc-avatar{width:56px;height:56px;border-radius:50%;background:var(--gold-glass2);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold-dim)}
-.pc-info{flex:1}.pc-name{font-size:16px;font-weight:700;letter-spacing:-0.3px}.pc-level{font-size:12px;color:var(--gold);margin-top:2px}
-.pc-xp-bar{height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;margin-top:8px}
-.pc-xp-inner{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--xp-bar));border-radius:2px;transition:width .8s}
-.profile-nav{display:flex;flex-direction:column;gap:2px;margin-bottom:16px}
-.p-nav-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:var(--transition)}
-.p-nav-item:hover{border-color:rgba(201,169,110,0.15)}
-.p-nav-icon{font-size:18px;width:32px;text-align:center;color:var(--gold-dim)}
-.p-nav-label{flex:1;font-size:13px;font-weight:500}
-.p-nav-arrow{color:var(--text-dim);font-size:12px}
-.ach-preview{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
-.ach-preview::-webkit-scrollbar{display:none}
-.ach-badge{min-width:60px;padding:10px 8px;border-radius:var(--radius-xs);background:var(--surface);text-align:center;font-size:20px;border:1px solid rgba(255,255,255,0.03);transition:var(--transition);color:var(--text-dim)}
-.ach-badge.unlocked{border-color:rgba(255,215,0,0.25);background:rgba(255,215,0,0.05);color:var(--gold)}
-.ach-badge.locked{opacity:.3}
-.ach-badge-name{font-size:8px;color:var(--text-dim);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px}
-
-/* ── Popups ── */
-#ach-popup{position:fixed;top:20px;right:20px;z-index:200;padding:14px 18px;background:rgba(20,20,30,0.95);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--gold);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.5);opacity:0;transform:translateX(120%);transition:all .5s cubic-bezier(.16,1,.3,1);pointer-events:none;display:flex;gap:10px;align-items:center;max-width:280px}
-#ach-popup.show{opacity:1;transform:translateX(0)}
-.ap-icon{font-size:24px;color:var(--gold)}.ap-title{font-weight:700;color:var(--gold);font-size:12px}.ap-sub{color:var(--text-dim);font-size:10px;margin-top:2px}
-#level-up{position:fixed;inset:0;z-index:180;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
-#level-up.show{opacity:1}.level-up-text{font-size:32px;font-weight:800;letter-spacing:4px;color:var(--gold-bright);text-shadow:0 0 40px rgba(201,169,110,.5);animation:level-boom 2s ease-out forwards}
-@keyframes level-boom{0%{transform:scale(.3);opacity:0}30%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
-
-/* ── Modal ── */
-.modal-overlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:.3s}
-.modal-overlay.open{opacity:1;visibility:visible}
-.modal-inner{background:var(--surface2);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);padding:24px;max-width:400px;width:90%;max-height:70vh;overflow-y:auto}
-.modal-title{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px}
-.modal-close{width:100%;padding:11px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:var(--text);cursor:pointer;margin-top:16px;font-size:13px;transition:var(--transition);font-weight:500}
-.modal-close:hover{background:var(--gold-glass)}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
-
-@media(max-width:400px){.collection-grid{grid-template-columns:repeat(2,1fr)}.artefact-card{min-width:160px;max-width:160px}}
-
-/* ── Guide Modal ── */
-.guide-overlay{position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .35s cubic-bezier(0.25,0.1,0.25,1),visibility .35s}
-.guide-overlay.open{opacity:1;visibility:visible}
-.guide-container{width:92%;max-width:680px;max-height:88vh;background:rgba(18,18,28,0.92);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(201,169,110,0.15);border-radius:28px;overflow:hidden;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .35s cubic-bezier(0.25,0.1,0.25,1);box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.guide-overlay.open .guide-container{transform:translateY(0)}
-.guide-header{display:flex;align-items:center;justify-content:space-between;padding:22px 28px 16px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
-.guide-h-left{display:flex;align-items:center;gap:12px}
-.guide-h-icon{font-size:24px;color:var(--gold-dim)}
-.guide-h-name{font-size:18px;font-weight:700;letter-spacing:-0.3px;color:var(--gold-bright)}
-.guide-close{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:18px}
-.guide-close:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-glass)}
-.guide-tabs{display:flex;gap:4px;padding:12px 28px;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0}
-.guide-tab-btn{padding:9px 20px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid transparent;background:transparent;color:var(--text-dim);cursor:pointer;transition:var(--transition);font-family:var(--font)}
-.guide-tab-btn:hover{color:var(--gold)}
-.guide-tab-btn.active{background:var(--gold-glass2);border-color:rgba(201,169,110,0.25);color:var(--gold-bright)}
-.guide-body{flex:1;overflow-y:auto;padding:24px 28px 28px;-webkit-overflow-scrolling:touch}
-.guide-body::-webkit-scrollbar{width:3px}.guide-body::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.15);border-radius:2px}
-.guide-tab-panel{display:none;animation:fadeIn .3s ease}
-.guide-tab-panel.active{display:block}
-.guide-official{font-size:14px;line-height:1.9;color:var(--text-mid)}
-.guide-official p{margin-bottom:16px}
-.guide-official p:last-child{margin-bottom:0}
-.guide-step{padding:18px 20px;border-radius:18px;background:var(--surface);border:1px solid rgba(255,255,255,0.04);margin-bottom:14px;transition:var(--transition)}
-.guide-step:hover{border-color:rgba(201,169,110,0.15);background:var(--gold-glass)}
-.guide-step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--gold-glass2);color:var(--gold);font-size:12px;font-weight:700;margin-bottom:10px}
-.guide-step-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;letter-spacing:-0.2px}
-.guide-step-desc{font-size:12px;line-height:1.7;color:var(--text-dim)}
-/* Guide button on EC card */
-.ec-guide-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:14px;border:1px solid rgba(201,169,110,0.2);background:var(--gold-glass);color:var(--gold);cursor:pointer;font-size:11px;font-weight:500;transition:var(--transition);margin-top:8px;font-family:var(--font)}
-.ec-guide-btn:hover{background:var(--gold-glass2);border-color:var(--gold);color:var(--gold-bright)}
-.ec-guide-btn svg{width:13px;height:13px;flex-shrink:0}
-
-/* ── Story Cards ── */
-.story-card{transition:transform 0.3s ease,box-shadow 0.3s ease}
-.story-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.4)}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+<!-- Inline SVG Icons -->
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <g id="ic-discover"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></g>
     <g id="ic-chat"><path d="M21 15a2 2 0 0 1-2 2H9l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></g>
     <g id="ic-codex"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="18"/></g>
     <g id="ic-profile"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></g>
-    <g id="ic-british"><rect x="4" y="16" width="16" height="4"/><rect x="5" y="8" width="3" height="8"/><rect x="10.5" y="6" width="3" height="10"/><rect x="16" y="8" width="3" height="8"/><path d="M4 8l8-5 8 5"/></g>
-    <g id="ic-louvre"><rect x="5" y="5" width="14" height="14" rx="1"/><rect x="8" y="8" width="8" height="8" rx="0.5"/></g>
-    <g id="ic-met"><rect x="5" y="10" width="14" height="10"/><path d="M5 10l2-4h2l1 2h4l1-2h2l2 4"/></g>
+    <g id="ic-story"><circle cx="12" cy="12" r="9"/><path d="M11 8h3v3h-3V8z"/><path d="M10 12h5v4h-5v-4z"/><path d="M4 12h2v4H4v-4z"/><path d="M18 12h2v4h-2v-4z"/><path d="M8 4h2v4H8V4z"/><path d="M14 4h2v4h-2V4z"/></g>
+    <g id="ic-british"><rect x="4" y="8" width="16" height="10" rx="1"/><rect x="6" y="5" width="4" height="3"/><rect x="14" y="5" width="4" height="3"/><rect x="9" y="10" width="6" height="8" rx="1"/><line x1="9" y1="14" x2="15" y2="14"/></g>
+    <g id="ic-louvre"><path d="M12 3L3 18v2h18v-2L12 3z"/><rect x="9" y="8" width="6" height="12"/><rect x="5" y="12" width="4" height="8"/><rect x="15" y="12" width="4" height="8"/></g>
+    <g id="ic-met"><rect x="4" y="4" width="8" height="16" rx="1"/><rect x="13" y="4" width="7" height="16" rx="1"/><rect x="4" y="4" width="16" height="5" rx="1"/></g>
     <g id="ic-palace"><path d="M3 18h18M5 18v-4c0-1 1-2 2-2h2c1 0 2 1 2 2v4M13 18v-4c0-1 1-2 2-2h2c1 0 2 1 2 2v4"/><path d="M5 12l2-4 2 2 1-3 1 3 2-2 2 4"/></g>
     <g id="ic-egyptian"><path d="M8 3h8l2 4H6z"/><path d="M7 7h10v4c0 4-2 8-5 8s-5-4-5-8V7z"/></g>
     <g id="ic-uffizi"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="9" r="1.5"/><circle cx="12" cy="16" r="1.5"/><circle cx="7" cy="14" r="1.5"/></g>
@@ -309,705 +56,103 @@ body{
     <g id="ic-nav-settings"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></g>
     <g id="ic-nav-info"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="8" stroke-width="3"/><line x1="12" y1="12" x2="12" y2="17"/></g>
     <g id="ic-spinner"><circle cx="12" cy="12" r="10" stroke-dasharray="32 32" stroke-dashoffset="0"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1.5s" repeatCount="indefinite"/></circle></g>
-
     <g id="ic-guide"><circle cx="12" cy="12" r="9"/><path d="M8 8h3v8H8zM13 8h3v4h-3zM13 14h3v2h-3z"/></g>
-    <g id="ic-story"><circle cx="12" cy="12" r="9" fill="none"/><path d="M8 7h3v10H8zM13 7h3v10h-3z"/><line x1="10" y1="9" x2="15" y2="9"/><line x1="10" y1="12" x2="15" y2="12"/><line x1="10" y1="15" x2="15" y2="15"/></g>
   </defs>
 </svg>
 
+<!-- Loading Screen -->
 <div id="loading">
-  <div class="l-ring-outer"><div class="l-ring-inner">
-    <svg class="icon-svg" viewBox="0 0 24 24" style="width:36px;height:36px"><use href="#ic-nav-museum"/></svg>
-  </div></div>
-  <div class="l-title">MUSE</div><div class="l-sub">博 悟</div>
+  <div class="l-ring-outer"><div class="l-ring-inner"><svg class="icon-svg icon-2xl" viewBox="0 0 24 24"><use href="#ic-british"/></svg></div></div>
+  <div class="l-title">MUSE</div>
+  <div class="l-sub">The Muse</div>
 </div>
 
+<!-- Museum Selector -->
 <div id="museum-selector">
-  <div class="museum-grid" id="museumGrid"></div>
+  <div id="lectorInner"></div>
 </div>
 
-<div id="ach-popup"><div class="ap-icon"></div><div><div class="ap-title"></div><div class="ap-sub"></div></div></div>
-<div id="level-up"><div class="level-up-text"></div></div>
+<!-- Header -->
+<div id="header">
+  <div class="h-left"><span class="h-logo">MUSE</span><span id="headerMuseum">Muse</span></div>
+  <div class="h-right">
+    <button class="h-btn" onclick="switchLang('en')">EN</button>
+    <button class="h-btn" onclick="switchLang('zh')">中</button>
+  </div>
+</div>
 
+<!-- App Container -->
+<div id="app">
+  <!-- Discover -->
+  <div id="tab-discover" class="tab-pane active" style="padding:20px;overflow-y:auto"></div>
 
-<div class="guide-overlay" id="guide-modal">
-  <div class="guide-container">
+  <!-- Chat -->
+  <div id="tab-chat" class="tab-pane"></div>
+
+  <!-- Collection -->
+  <div id="tab-collection" class="tab-pane" style="padding:20px;overflow-y:auto"></div>
+
+  <!-- Story -->
+  <div id="tab-story" class="tab-pane" style="padding:20px;overflow-y:auto"></div>
+
+  <!-- Profile -->
+  <div id="tab-profile" class="tab-pane" style="padding:20px;overflow-y:auto"></div>
+</div>
+
+<!-- Tab Bar -->
+<div id="tab-bar">
+  <button class="tab-item active" data-tab="discover"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-discover"/></svg><span class="tab-label">Discover</span></button>
+  <button class="tab-item" data-tab="chat"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-chat"/></svg><span class="tab-label">Chat</span></button>
+  <button class="tab-item" data-tab="collection"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-codex"/></svg><span class="tab-label">Codex</span></button>
+  <button class="tab-item" data-tab="story"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-story"/></svg><span class="tab-label">Story</span></button>
+  <button class="tab-item" data-tab="profile"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-profile"/></svg><span class="tab-label">Profile</span></button>
+</div>
+
+<!-- Achievement Popup -->
+<div id="ach-popup"><div class="ap-icon"></div><div class="ap-title"></div><div class="ap-sub"></div></div>
+
+<!-- Level Up -->
+<div id="level-up"><div class="level-up-icon">&#9733;</div><div class="level-up-text"></div></div>
+
+<!-- Guide Modal -->
+<div id="guide-modal" class="guide-overlay">
+  <div class="guide-card">
     <div class="guide-header">
-      <div class="guide-h-left">
-        <span class="guide-h-icon" id="guide-icon"></span>
-        <span class="guide-h-name" id="guide-name"></span>
+      <div class="guide-header-left">
+        <div class="guide-icon" id="guide-icon"></div>
+        <div class="guide-title" id="guide-name"></div>
       </div>
       <button class="guide-close" onclick="closeGuideModal()">&times;</button>
     </div>
     <div class="guide-tabs">
-      <button class="guide-tab-btn active" data-guide-tab="official" onclick="switchGuideTab('official')">博物馆官方解说</button>
-      <button class="guide-tab-btn" data-guide-tab="appreciate" onclick="switchGuideTab('appreciate')">如何鉴赏</button>
+      <button class="guide-tab-btn" data-guide-tab="official" onclick="switchGuideTab('official')">Official</button>
+      <button class="guide-tab-btn" data-guide-tab="appreciate" onclick="switchGuideTab('appreciate')">Guide</button>
     </div>
-    <div class="guide-body">
-      <div class="guide-tab-panel active" id="guide-panel-official"></div>
-      <div class="guide-tab-panel" id="guide-panel-appreciate"></div>
+    <div class="guide-panels">
+      <div id="guide-panel-official" class="guide-tab-panel active"></div>
+      <div id="guide-panel-appreciate" class="guide-tab-panel"></div>
     </div>
   </div>
 </div>
-<div class="modal-overlay" id="ach-modal">
-  <div class="modal-inner"><div class="modal-title"></div><div id="ach-list"></div><button class="modal-close" onclick="toggleModal('ach-modal')">Close</button></div>
-</div>
-<div class="modal-overlay" id="settings-modal">
-  <div class="modal-inner"><div class="modal-title">Settings</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="font-size:13px">Reset Progress</span><button class="h-btn" onclick="resetProgress()" style="color:#e05555;border-color:rgba(224,85,85,0.3)">Reset</button></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="font-size:13px">Switch Museum</span><button class="h-btn" onclick="showMuseumSelector()">Change</button></div>
-    </div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal-inner">
+    <div class="modal-title">Settings</div>
+    <div style="margin-top:16px"><button onclick="resetProgress()" style="padding:8px 18px;border-radius:12px;border:1px solid #ff6b6b;background:transparent;color:#ff6b6b;font-size:12px;cursor:pointer">Reset Progress</button></div>
     <button class="modal-close" onclick="toggleModal('settings-modal')">Close</button>
   </div>
 </div>
 
-<div id="app">
-  <div class="app-header">
-    <div class="header-brand"><span class="header-logo">MUSE</span><span class="header-museum" id="headerMuseum"></span></div>
-    <div class="header-actions">
-      <button class="h-btn active" onclick="switchLang('en')">EN</button>
-      <button class="h-btn" onclick="switchLang('zh')">中</button>
-    </div>
-  </div>
-  <div class="tab-content" id="tabContent">
-    <div class="tab-pane active" id="tab-discover"></div>
-    <div class="tab-pane" id="tab-chat"></div>
-    <div class="tab-pane" id="tab-collection"></div>
-    <div class="tab-pane" id="tab-profile"></div>
-    <div class="tab-pane" id="tab-story" style="overflow-y:auto;padding:0;"></div>
-  </div>
-  <div id="tab-bar">
-    <button class="tab-item active" data-tab="discover"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-discover"/></svg><span class="tab-label">Discover</span></button>
-    <button class="tab-item" data-tab="chat"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-chat"/></svg><span class="tab-label">Chat</span></button>
-    <button class="tab-item" data-tab="collection"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-codex"/></svg><span class="tab-label">Codex</span></button>
-    <button class="tab-item" data-tab="story"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-story"/></svg><span class="tab-label">Story</span></button>
-    <button class="tab-item" data-tab="profile"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-profile"/></svg><span class="tab-label">Profile</span></button>
+<!-- Achievements Modal -->
+<div id="ach-modal" class="modal-overlay">
+  <div class="modal-inner">
+    <div class="modal-title">Achievements</div>
+    <div id="ach-list" style="max-height:50vh;overflow-y:auto;margin:12px 0"></div>
+    <button class="modal-close" onclick="toggleModal('ach-modal')">Close</button>
   </div>
 </div>
 
-<script>
-// ══════════════════ SVG Icon Helper ══════════════════
-function renderIcon(id,cls){cls=cls||'';return '<svg class="icon-svg '+cls+'" viewBox="0 0 24 24"><use href="#'+id+'"/></svg>'}
-
-// ══════════════════ I18N ══════════════════
-let LANG='en';
-const I18N={
-  en:{
-    sel_title:'Choose Your Museum',sel_sub:'Select a museum to begin your journey',
-    open:'Open Now',soon:'Coming Soon',planned:'Planned',
-    tab_discover:'Discover',tab_chat:'Chat',tab_codex:'Codex',tab_story:'Story',tab_profile:'Profile',
-    disc_greeting:'Good to see you',disc_question:'What draws your eye today?',
-    disc_daily:'Today\'s Highlight',disc_explore:'Start Exploring',
-    disc_hot:'Popular Masterpieces',disc_recent:'Recently Viewed',
-    stat_insight:'Insight XP',stat_codex:'Codex',stat_depth:'Avg Depth',
-    coll_title:'Your Codex',coll_all:'All',coll_collected:'Collected',coll_pending:'To Discover',
-    prof_museum_switch:'Switch Museum',prof_ach:'Achievements',prof_settings:'Settings',prof_about:'About Muse',
-    prof_about_text:'Muse \u535a\u609f \u2014 an AI-powered museum companion. Explore humanity\'s greatest treasures through natural conversation. Built as a graduation project, 2026.',
-    chat_welcome:'Choose a masterpiece above to begin your journey.<br><br>Every meaningful question earns <strong>Insight XP</strong>.',
-    chat_placeholder:'Ask me anything...',
-    mode_explore:'Explore',mode_narrate:'Narrate',mode_debate:'Debate',mode_children:'Kids',
-    qa_deeper:'Go Deeper',qa_angle:'Another Angle',qa_quiz:'Challenge Me',qa_relate:'Connections',
-    level_observer:'Observer',level_explorer:'Explorer',level_scholar:'Scholar',level_curator:'Curator',
-    ach_new:'New Achievement!',xp_gain:'+XP',codex_unlock:'Codex unlocked!',
-    debate_locked:'Debate unlocks at Scholar (300 XP)',
-    context_title:'Related:',
-  },
-  zh:{
-    sel_title:'选择你的博物馆',sel_sub:'选择一座博物馆，开启探索之旅',
-    open:'开放中',soon:'即将开放',planned:'规划中',
-    tab_discover:'发现',tab_chat:'对话',tab_codex:'图鉴',tab_story:'故事',tab_profile:'我的',
-    disc_greeting:'你好',disc_question:'今天什么吸引了你的目光？',
-    disc_daily:'今日精选',disc_explore:'开始探索',
-    disc_hot:'热门馆藏',disc_recent:'最近浏览',
-    stat_insight:'洞察力',stat_codex:'图鉴',stat_depth:'平均深度',
-    coll_title:'我的图鉴',coll_all:'全部',coll_collected:'已收集',coll_pending:'待发现',
-    prof_museum_switch:'切换博物馆',prof_ach:'成就',prof_settings:'设置',prof_about:'关于博悟',
-    prof_about_text:'Muse \u535a\u609f \u2014 AI驱动的博物馆伴侣。通过自然对话探索人类最伟大的宝藏。2026年毕业设计作品。',
-    chat_welcome:'选择上方一件杰作，开启探索之旅。<br><br>每次有意义的提问都能获得<strong>洞察力经验值</strong>。',
-    chat_placeholder:'尽管问我……',
-    mode_explore:'探索',mode_narrate:'讲解',mode_debate:'辩论',mode_children:'儿童',
-    qa_deeper:'深入探索',qa_angle:'换个角度',qa_quiz:'挑战测试',qa_relate:'关联文物',
-    level_observer:'观察者',level_explorer:'探索者',level_scholar:'学者',level_curator:'策展人',
-    ach_new:'新成就！',xp_gain:'+经验值',codex_unlock:'图鉴解锁！',
-    debate_locked:'辩论需学者等级（300经验）解锁',
-    context_title:'关联：',
-  }
-};
-function t(k){return I18N[LANG][k]||k}
-function switchLang(l){
-  LANG=l;document.querySelectorAll('.h-btn').forEach(b=>b.classList.toggle('active',(b.textContent.trim()===(l==='en'?'EN':'中'))));
-  document.querySelectorAll('.tab-item').forEach(b=>{const tb=b.dataset.tab;if(tb)b.querySelector('.tab-label').textContent=t('tab_'+tb)});
-  renderMuseumSelector();renderDiscover();renderChat();renderCollection();renderProfile();renderStory();
-}
-
-// ══════════════════ MUSEUM DATA ══════════════════
-const MUSEUMS=[
-  {id:'british',name_en:'British Museum',name_zh:'大英博物馆',icon:'ic-british',region_en:'Europe',region_zh:'欧洲',loc_en:'London, UK',loc_zh:'英国·伦敦',desc_en:'The world\'s first public national museum. 8 million works spanning two million years.',desc_zh:'世界上第一座国家公共博物馆。800万件藏品跨越两百万年历史。',status:'open'},
-  {id:'louvre',name_en:'Louvre',name_zh:'卢浮宫',icon:'ic-louvre',region_en:'Europe',region_zh:'欧洲',loc_en:'Paris, France',loc_zh:'法国·巴黎',desc_en:'The world\'s most-visited museum — from the Mona Lisa to Winged Victory.',desc_zh:'全球访问量最高的博物馆——从蒙娜丽莎到胜利女神。',status:'open'},
-  {id:'met',name_en:'The Met',name_zh:'大都会',icon:'ic-met',region_en:'North America',region_zh:'北美',loc_en:'New York, USA',loc_zh:'美国·纽约',desc_en:'5,000 years of art across 2 million works.',desc_zh:'跨越五千年、两百万件作品。',status:'coming_soon'},
-  {id:'palace',name_en:'Palace Museum',name_zh:'故宫博物院',icon:'ic-palace',region_en:'Asia',region_zh:'亚洲',loc_en:'Beijing, China',loc_zh:'中国·北京',desc_en:'The Forbidden City — 1.8 million imperial treasures.',desc_zh:'紫禁城——180万件皇家珍宝。',status:'planned'},
-  {id:'egyptian',name_en:'Egyptian Museum',name_zh:'埃及博物馆',icon:'ic-egyptian',region_en:'Africa',region_zh:'非洲',loc_en:'Cairo, Egypt',loc_zh:'埃及·开罗',desc_en:'Tutankhamun\'s gold mask anchors 120,000 artefacts.',desc_zh:'图坦卡蒙黄金面具领衔12万件文物。',status:'planned'},
-  {id:'uffizi',name_en:'Uffizi Gallery',name_zh:'乌菲兹美术馆',icon:'ic-uffizi',region_en:'Europe',region_zh:'欧洲',loc_en:'Florence, Italy',loc_zh:'意大利·佛罗伦萨',desc_en:'The cradle of the Renaissance — Botticelli, Leonardo, Raphael.',desc_zh:'文艺复兴的摇篮——波提切利、达芬奇、拉斐尔。',status:'planned'},
-];
-let currentMuseum=null;
-
-// ══════════════════ EXHIBIT DATA ══════════════════
-const EXHIBITS={
-  british:[
-    {
-id:'b1',name_en:'Rosetta Stone',name_zh:'罗塞塔石碑',icon:'ic-stone',
-date_en:'196 BC',date_zh:'公元前196年',cat_en:'Granodiorite Stele',cat_zh:'花岗闪长岩石碑',
-mat:'Granodiorite',dims:'114×72×28 cm, 760 kg',origin_en:'El-Rashid, Egypt',origin_zh:'埃及 拉希德',
-desc_en:'The key that unlocked three millennia of Egyptian civilisation — the same decree in three scripts: hieroglyphs, Demotic, and Ancient Greek.',desc_zh:'揭开三千年埃及文明的钥匙——同一道法令以三种文字铭刻。',
-deep_en:'Thomas Young identified royal names; Champollion cracked the code in 1822. The top-right corner broken in antiquity.',deep_zh:'托马斯·杨识别出王名圈；商博良1822年破译。右上角在古代已缺损。',
-facts_en:['18 lines of Greek changed history','Weighs 760 kg — as much as a small car','Discovered by accident during French fortification dig'],facts_zh:['18行希腊文改变了历史','重760公斤','法国士兵挖地基时偶然发现'],
-rel:[{id:'b3',name_en:'Mummy of Katebet',name_zh:'卡特贝特木乃伊',r_en:'Same Egyptian gallery',r_zh:'同一埃及展厅'}],
-quiz:{q_en:['How many scripts?','Who cracked it in 1822?'],a_en:['Three','Champollion'],q_zh:['几种文字？','谁在1822年破译？'],a_zh:['三种','商博良']},
-official_en:'<p>The Rosetta Stone is a broken part of a larger stone slab, known as a stela, carved in 196 BC during the reign of the young king Ptolemy V. It bears an official decree inscribed in three different scripts: hieroglyphs (used for sacred and formal texts), Demotic (the everyday script of literate Egyptians), and Ancient Greek (the language of the Ptolemaic administration).</p><p>Discovered in 1799 by French soldiers during Napoleon\'s campaign in Egypt, the Stone became the key to unlocking the mystery of Egyptian hieroglyphs. Scholars realised the three inscriptions conveyed the same message, and by comparing the known Greek text with the unknown scripts, Thomas Young identified royal names enclosed in cartouches, and Jean-François Champollion completed the decipherment in 1822.</p><p>The Rosetta Stone thus opened up three millennia of Egyptian history, literature and religion. It remains one of the most visited objects in the British Museum, a symbol of cross-cultural understanding and the power of human curiosity.</p>',official_zh:'<p>罗塞塔石碑是一块更大的石碑残片，刻于公元前196年托勒密五世统治时期。碑上铭刻着同一道法令，但使用了三种不同的文字：圣书体（用于宗教和正式场合）、世俗体（当时埃及识字者日常使用的草书）以及古希腊文（托勒密王朝的行政语言）。</p><p>1799年，拿破仑远征埃及的法国士兵在修筑防御工事时偶然发现了它。学者们很快意识到三种文字传达的是同一信息。通过将已知的古希腊文与未知的圣书体、世俗体进行比对，英国学者托马斯·杨率先识别出王名圈中的法老名号，法国学者商博良则于1822年完成了全面破译。</p><p>罗塞塔石碑由此打开了通往三千年埃及历史的大门，成为大英博物馆最受瞩目的藏品之一，象征着人类无与伦比的好奇心和跨文化理解的力量。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "Stand back and take in the slab as a whole. It is dark, dense, and broken at the top right. Despite its fragmentary state, the three distinct bands of text are immediately visible. What mood does this ancient decree convey before you even read a word?"}, {"step": 2, "title": "Observe the Details", "desc": "Look closely at the three scripts. The top band is hieroglyphs — tightly packed rows of pictorial signs, each a miniature work of art. The middle band is Demotic, a flowing cursive that looks almost like Arabic. The bottom is elegant, orderly Greek. Notice the cartouches (oval rings) enclosing royal names."}, {"step": 3, "title": "Analyse the Craft", "desc": "The stone is granodiorite, a hard igneous rock sourced from Aswan, over 900 km from where it was found. The carvers achieved crisp, precise incisions despite the stone\'s hardness. The three scripts are carved at different sizes — hieroglyphs are largest, befitting their sacred status."}, {"step": 4, "title": "Historical Context", "desc": "In 196 BC, Egypt was under Ptolemaic rule — a Greek dynasty descended from one of Alexander the Great\'s generals. The decree was issued by a council of priests gathered at Memphis, reaffirming the thirteen-year-old king\'s royal cult. It promised tax breaks for temples and ordered copies to be placed in every major temple."}, {"step": 5, "title": "Why It Matters", "desc": "The Rosetta Stone is not merely an object of linguistic triumph. It embodies the layered complexity of cultural encounter: a Greek king addressing Egyptian priests in both sacred and vernacular scripts. Every translation is an act of bridge-building. Stand before it and ask: what lost languages of our own time await their Rosetta Stone?"}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "退后一步，将石碑作为整体来感受。它厚重、深沉，右上角在古代就已缺损。尽管不完整，三行截然不同的文字带依然一目了然。在读懂哪怕一个字之前，这块古老的石碑向你传达了什么情绪？"}, {"step": 2, "title": "细节观察", "desc": "近距离细看三种文字：最上方的圣书体——密密麻麻排列的图画符号，每一个都是一幅微型艺术品；中间的世俗体——流畅的草书，几乎像阿拉伯文；最下方的古希腊文——优雅有序。注意圣书体部分中椭圆形环（王名圈）包围的法老名号。"}, {"step": 3, "title": "技法解析", "desc": "石碑材质为花岗闪长岩，产自900多公里外的阿斯旺地区。刻工在如此坚硬的石料上依然实现了精准、干净利落的凿刻。三种文字刻凿的尺寸不同——圣书体最大，与其神圣地位相称。"}, {"step": 4, "title": "历史语境", "desc": "公元前196年，埃及处于托勒密王朝统治之下。这道法令由聚集在孟菲斯的祭司会议发布，旨在确认年仅十三岁的国王的神圣崇拜地位。它承诺给予神庙税收减免，并下令在每一座主要神庙中竖立副本。"}, {"step": 5, "title": "深层感悟", "desc": "罗塞塔石碑不仅仅是语言学的里程碑。它承载着文明交汇的多重层次：一位希腊国王用神圣的与世俗的两种文字向埃及祭司发布法令。每一场翻译都是一次架桥。站在这块石碑前思考：我们这个时代，又有哪些失落的声音正等待着属于它们的罗塞塔石碑？"}]'
-    },
-
-    {
-id:'b2',name_en:'Parthenon Marbles',name_zh:'帕特农雕塑',icon:'ic-column',
-date_en:'447–432 BC',date_zh:'公元前447-432年',cat_en:'Marble Sculpture',cat_zh:'大理石雕塑',
-mat:'Pentelic Marble',dims:'Frieze ~160 m',origin_en:'Athens, Greece',origin_zh:'希腊 雅典',
-desc_en:'Crowning achievement of Classical Greece under Phidias — the Panathenaic procession with gods among mortals.',desc_zh:'古典希腊巅峰之作——泛雅典娜节游行，众神与凡人交融。',
-deep_en:'Originally blazed with paint and gold. Elgin\'s removal authorisation document never found.',deep_zh:'原有着鲜艳色彩和黄金。埃尔金移除的授权文件从未被找到。',
-facts_en:['Originally painted in vivid colours','Elgin spent £74,000 (~£7m today)','Greece requests their return since 1983'],facts_zh:['原有着鲜艳色彩','埃尔金花费约合今日700万英镑','希腊自1983年起要求归还'],
-rel:[{id:'b6',name_en:'Benin Bronzes',name_zh:'贝宁青铜器',r_en:'Restitution debate',r_zh:'归还争议'}],
-quiz:{q_en:['Which goddess?','Who removed them?'],a_en:['Athena Parthenos','Lord Elgin'],q_zh:['献给哪位女神？','谁移走了它们？'],a_zh:['雅典娜','埃尔金勋爵']},
-official_en:'<p>The Parthenon Sculptures are a collection of marble architectural decoration from the temple of Athena (the Parthenon) on the Acropolis in Athens. Created between 447 and 432 BC under the supervision of the sculptor Phidias, they consist of three main elements: a continuous frieze showing the Panathenaic procession celebrating Athena\'s birthday; a series of sculpted relief panels (metopes) depicting the battle between Centaurs and Lapiths; and larger-than-life figures of gods and legendary heroes from the temple\'s pediments.</p><p>The British Museum houses 15 metopes, 17 pedimental figures and approximately 75 metres of the original frieze. The sculptures were originally brightly painted and adorned with metal attachments. They represent the pinnacle of Classical Greek art — a moment when sculptors achieved an unprecedented naturalism in rendering the human body, drapery and movement.</p>',official_zh:'<p>帕特农神庙雕塑是来自雅典卫城帕特农神庙（雅典娜神殿）的大理石建筑装饰，制作于公元前447至432年间，在雕塑大师菲迪亚斯的主持下完成。主要由三部分组成：环绕神庙内殿的连续楣板，描绘了庆祝雅典娜生日的泛雅典娜节游行队伍；一系列浮雕嵌板（排档间饰），刻画了半人马与拉庇泰人战斗；以及神庙山形墙上的巨型神祇与英雄雕像。</p><p>大英博物馆收藏了15块排档间饰、17尊山形墙雕像以及约75米长的原始楣板。这些雕塑原本施有鲜艳的彩绘并镶嵌金属附件。它们代表了古典希腊艺术的巅峰——雕塑家在对人体、衣纹和动态的刻画上达到了前所未有的自然主义高度。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "Step into Room 18 and let the sheer scale of the frieze wash over you — it runs for 75 metres around the room. The figures seem to move: horsemen gallop, maidens walk in stately procession, gods recline. Let the rhythm of the procession carry your eye along the entire length."}, {"step": 2, "title": "Observe the Details", "desc": "The drapery — look at how the carvers rendered thin, almost transparent fabric clinging to bodies in motion. On the metopes, note the tension in the centaur\'s torso as it grapples a human. Each figure has a distinct personality."}, {"step": 3, "title": "Analyse the Craft", "desc": "The marble is Pentelic, from Mount Pentelikon near Athens. Under Phidias, a team of sculptors worked with unified vision yet individual hands are detectable. Traces of ancient pigment — red, blue, gold — have been found. Relief depth varies, creating spatial illusion."}, {"step": 4, "title": "Historical Context", "desc": "Athens in the mid-5th century BC was at its height after victory over Persia. The Parthenon was the centrepiece of Pericles\' building programme — a temple, treasury and political monument in one. The frieze placed ordinary Athenian citizens alongside gods."}, {"step": 5, "title": "Why It Matters", "desc": "The Parthenon Sculptures embody the Greek ideal of aretê (excellence) — the belief that humanity could approach the divine through reason and skill. Yet they also raise profound questions about cultural ownership. Who do these marbles belong to? The answers reveal as much about our present as they do about the past."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "步入大英博物馆第18展厅，让楣板长达75米的磅礴气势将你包围。这些人物仿佛在动：骑兵飞驰，少女端庄行进，众神悠然倚坐。先让游行队伍的韵律带你扫过整个画面。"}, {"step": 2, "title": "细节观察", "desc": "关注衣褶——雕刻家如何表现薄如蝉翼的织物紧贴运动中的身体。在排档间饰中，注意半人马腰腹肌肉在搏斗时的张力。每个人物都有独特的个性。"}, {"step": 3, "title": "技法解析", "desc": "大理石产自雅典附近的彭特利库斯山。在菲迪亚斯统领下，一队雕塑家以统一的美学理念分工协作。雕塑上已发现古代颜料痕迹——红、蓝、金。浮雕深度变化有致，营造出空间纵深的错觉。"}, {"step": 4, "title": "历史语境", "desc": "公元前5世纪中叶的雅典正值权力巅峰，击败波斯后领导提洛同盟。帕特农是伯里克利建设计划的核心——集神庙、金库和政治纪念碑于一体。楣板将普通雅典公民与诸神并列。"}, {"step": 5, "title": "深层感悟", "desc": "帕特农雕塑体现了希腊人对卓越的信仰——相信人类凭借理性和技艺可以接近神明。然而它们也引发了关于文化归属的深刻追问。凝视它们时，不妨思考：这些大理石究竟属于谁？答案不仅关乎过去，也关乎我们的当下。"}]'
-    },
-
-    {
-id:'b3',name_en:'Mummy of Katebet',name_zh:'卡特贝特木乃伊',icon:'ic-coffin',
-date_en:'c.1300 BC',date_zh:'约公元前1300年',cat_en:'Painted Mummy',cat_zh:'彩绘木乃伊',
-mat:'Wood, plaster, linen, gold leaf',dims:'~170 cm',origin_en:'Thebes, Egypt',origin_zh:'埃及 底比斯',
-desc_en:'A Chantress of Amun — temple singer of high status. Gilded mask for eternity; scarab prevents heart from testifying against her.',desc_zh:'阿蒙神的女歌者——镀金面具表象永恒；圣甲虫防止心脏作不利证词。',
-deep_en:'CT scans reveal arthritis and missing teeth — deeply human across 3,300 years. Her name means "cool/refreshing."',deep_zh:'CT扫描显示关节炎和缺牙——跨越3300年的深刻人性。她的名字意为"清凉/清新"。',
-facts_en:['Name means "cool/refreshing"','CT shows osteoarthritis','Scarab was a heart "get out of judgement free" card'],facts_zh:['名字意为"清凉/清新"','CT显示骨关节炎','圣甲虫是心脏的"免罪金牌"'],
-rel:[{id:'b1',name_en:'Rosetta Stone',name_zh:'罗塞塔石碑',r_en:'Egyptian collection',r_zh:'埃及馆藏'}],
-quiz:{q_en:['Her occupation?','Amulet on her chest?'],a_en:['Chantress of Amun','Scarab beetle'],q_zh:['她的职业？','胸口的护身符？'],a_zh:['阿蒙女歌者','圣甲虫']},
-official_en:'<p>The Mummy of Katebet is a beautifully preserved painted mummy from Thebes, dating to around 1300 BC during Egypt\'s New Kingdom. Katebet held the title of Chantress of Amun — a temple singer of considerable status at the great temple complex of Karnak.</p><p>The mummy is wrapped in layers of linen, with a gilded cartonnage mask covering the face, its wide eyes gazing into eternity. A painted wooden board covers the body, decorated with deities and protective symbols. Crucially, a heart scarab amulet was placed over her chest — inscribed with a spell to prevent her heart from testifying against her during the weighing of the heart ceremony in the Hall of Judgement.</p><p>CT scans have revealed that Katebet suffered from osteoarthritis and had lost several teeth, humanising this ancient individual across more than three millennia.</p>',official_zh:'<p>卡特贝特木乃伊是一件保存精美的彩绘木乃伊，出土于底比斯（今卢克索），年代约公元前1300年的埃及新王国时期。卡特贝特生前担任阿蒙神的女歌者——在宏伟的卡纳克神庙中享有崇高地位的女祭司。</p><p>木乃伊外层包裹多层亚麻布，面部覆以镀金的硬纸板面具，一双大眼凝视着永恒。身体上盖有一块彩绘木板，绘有诸神与护身符图案。胸口安放着一枚圣甲虫护身符——刻有防止心脏在冥界审判厅中做出不利证词的咒语。</p><p>CT扫描显示卡特贝特患有骨关节炎且缺失了数颗牙齿，令这位穿越三千多年时光的古人充满了真实的人性。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "Look at the mummy as a person, not a relic. The golden face gazes serenely forward. The painted chest board is rich with colour. This was someone who mattered — someone prepared with great care for an eternal journey."}, {"step": 2, "title": "Observe the Details", "desc": "Zoom in on the gilded mask: the large, outlined eyes follow the Egyptian convention of idealised portraiture. Find the heart scarab on her chest — it was the most critical amulet in the burial. Note the deities on the body board: Osiris, Isis, Nephthys, guardians of the afterlife."}, {"step": 3, "title": "Analyse the Craft", "desc": "The mummification process took 70 days. Brain removed through the nose, organs in canopic jars, body dehydrated in natron salt for 40 days. The cartonnage mask is linen stiffened with plaster, then gilded. The painted board uses mineral pigments — red ochre, Egyptian blue, carbon black."}, {"step": 4, "title": "Historical Context", "desc": "New Kingdom Thebes was the religious heart of Egypt. Chantresses of Amun were elite women performing music and ritual at Karnak Temple. Katebet lived during a period of imperial expansion and immense temple wealth."}, {"step": 5, "title": "Why It Matters", "desc": "CT scans revealing arthritis and tooth loss transform Katebet from an artefact into a person. Across 3,300 years, her hopes for eternity speak to our universal desire to be remembered. The scarab on her chest reveals a deeply human anxiety about moral accountability."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "把它当作一个人，而非一件遗物来看待。金色的面孔宁静地凝望前方。彩绘胸板色彩丰富。这是一位重要人物，被精心准备踏上永恒之旅。"}, {"step": 2, "title": "细节观察", "desc": "聚焦镀金面具：大而轮廓分明的眼睛遵循古埃及理想化肖像传统。找到她胸口的圣甲虫护身符——这是葬礼中最重要的护身符。注意身体板上绘制的神祇：奥西里斯、伊西斯、奈芙蒂斯，皆为冥界的守护神。"}, {"step": 3, "title": "技法解析", "desc": "木乃伊制作耗时70天。脑组织经鼻腔取出，内脏置入卡诺匹斯罐，身体在天然泡碱盐中脱水40天。硬纸板面具以亚麻加石膏硬化后镀金。彩绘木板使用矿物颜料——赭红、埃及蓝、炭黑。"}, {"step": 4, "title": "历史语境", "desc": "新王国时期的底比斯是埃及的宗教中心。阿蒙女歌者是精英阶层的女性，在卡纳克神庙演奏音乐并执行仪式。卡特贝特生活在一个帝国扩张、神庙富庶的时代。"}, {"step": 5, "title": "深层感悟", "desc": "CT扫描揭示的关节炎和牙齿缺失，将卡特贝特从文物还原为人。穿越三千三百年光阴，她对永恒的期盼与我们对被铭记的渴望遥相呼应。胸口的圣甲虫揭示了人类对道德责任的深切焦虑。"}]'
-    },
-
-    {
-id:'b4',name_en:'Sutton Hoo Helmet',name_zh:'萨顿胡头盔',icon:'ic-helmet',
-date_en:'c.AD 625',date_zh:'约公元625年',cat_en:'Iron & Bronze Helmet',cat_zh:'铁质青铜头盔',
-mat:'Iron, tinned bronze, garnets',dims:'31.8×21.5 cm',origin_en:'Suffolk, England',origin_zh:'英格兰 萨福克',
-desc_en:'The face of early England — garnet eyebrows, dragon crest, from a 27-metre ship burial.',desc_zh:'早期英格兰的面孔——石榴石眉毛、龙冠，出土于27米长的船葬墓。',
-deep_en:'Funded by Edith Pretty, a widow who sensed something beneath the mounds. Inspired Tolkien\'s Rohirrim.',deep_zh:'由伊迪丝·普雷蒂资助——感知到土丘下埋藏着什么的寡妇。启发了托尔金的洛汗骑士。',
-facts_en:['No body — acidic sand dissolved all remains','Ship was 27m — only a "sand shadow" left','Funded by Edith Pretty, a Suffolk widow'],facts_zh:['没有遗体——酸性沙土溶解了一切','船长27米——只剩"沙影"','由萨福克寡妇伊迪丝资助'],
-rel:[{id:'b5',name_en:'Lewis Chessmen',name_zh:'刘易斯棋子',r_en:'Medieval British finds',r_zh:'英国中世纪发现'}],
-quiz:{q_en:['Type of burial?','Who funded excavation?'],a_en:['Ship burial','Edith Pretty'],q_zh:['墓葬类型？','谁资助发掘？'],a_zh:['船葬墓','伊迪丝·普雷蒂']},
-official_en:'<p>The Sutton Hoo helmet is an iron and tinned copper alloy helmet from early 7th-century Anglo-Saxon England, discovered in 1939 at Sutton Hoo, Suffolk, during the excavation of a 27-metre-long ship burial. It is one of only four complete Anglo-Saxon helmets known to survive.</p><p>The helmet consists of an iron cap, cheek-pieces, a face-mask and a neck-guard. Its surface is covered with tinned copper alloy panels stamped with intricate animal interlace patterns and warrior motifs. The eyebrows are inlaid with silver wire and end in gilded boar heads; above the eye sockets sit strips of garnet cloisonné work. A dragon-like crest runs from front to back.</p><p>The helmet\'s design echoes late Roman cavalry helmets, showing continuity with the classical past. It is perhaps the most iconic object from Anglo-Saxon England.</p>',official_zh:'<p>萨顿胡头盔是一件7世纪早期盎格鲁-撒克逊时期的铁质与镀锡铜合金头盔，1939年在英格兰萨福克郡萨顿胡的一处27米长的船葬墓中被发掘。这是目前仅存的四顶完整的盎格鲁-撒克逊头盔之一。</p><p>头盔由铁质帽体、护颊、面罩和颈甲组成。表面覆以镀锡铜合金面板，压印着精美的动物交缠纹饰和武士图案。眉毛以银丝镶嵌，末端为镀金野猪头；眼眶上方镶嵌着一排石榴石掐丝作品。一条龙形冠脊从前至后贯穿头盔。</p><p>头盔设计呼应了晚期罗马骑兵盔，显示出与古典传统的延续性。它或许是盎格鲁-撒克逊英格兰最具标志性的文物。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "The helmet confronts you like a face from another world. The empty eye sockets, the gilded boar-head eyebrows, the dragon crest — it is at once regal and fierce. Before you read its story, let it gaze at you."}, {"step": 2, "title": "Observe the Details", "desc": "Study the pressed panels. The interlace patterns of serpents and beasts in endless knots. The warrior scenes: one dancing with spears, another fallen on his shield carrying a horn. The garnet above the eyes glows deep red."}, {"step": 3, "title": "Analyse the Craft", "desc": "Constructed from iron, covered with tinned copper alloy sheets for a silvery gleam dazzling in firelight. Panels stamped using at least five different dies. Garnet work uses cloisonné technique — thin gold cells filled with polished garnets backed with gold foil."}, {"step": 4, "title": "Historical Context", "desc": "The 7th century was a period of transition in England — between Roman withdrawal and Viking arrival. The ship burial with treasures from as far as Byzantium and garnets from India speaks to far-reaching trade. The helmet was likely worn by a king — perhaps Rædwald of East Anglia."}, {"step": 5, "title": "Why It Matters", "desc": "The Sutton Hoo helmet is the face of early England — a fusion of Germanic, Celtic, Roman and Scandinavian influences. It reminds us that the \'Dark Ages\' were not dark at all, but rich with artistry and ambition. And it was discovered because one woman, Edith Pretty, trusted her intuition."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "头盔如异世界的面孔凝视着你。空洞的眼眶、镀金的野猪头眉毛、龙形冠脊——威严而又凶猛。在阅读它的故事之前，先让它凝视你。"}, {"step": 2, "title": "细节观察", "desc": "细看压印面板。交缠纹饰——蛇与兽在无尽循环中缠绕。武士场景：一人持矛起舞，另一人倒在盾牌上手握号角。眼眶上方石榴石的深红色辉光。"}, {"step": 3, "title": "技法解析", "desc": "头盔主体由铁锻造，再覆以镀锡铜合金薄板呈现银白色光泽——在火光中曾耀眼夺目。装饰面板使用至少五种不同模具冲压。石榴石镶嵌采用掐丝珐琅工艺。"}, {"step": 4, "title": "历史语境", "desc": "7世纪的英格兰处于罗马撤离与维京人到来之间的过渡时期。船葬中随葬的珍宝远至拜占庭，石榴石来自印度，诉说着远距离贸易的世界。头盔很可能为国王所有——也许是东盎格利亚的雷德沃尔德。"}, {"step": 5, "title": "深层感悟", "desc": "萨顿胡头盔是早期英格兰的面孔——融合了日耳曼、凯尔特、罗马与斯堪的纳维亚的影响。它提醒我们\\"黑暗时代\\"并不黑暗，而是充满艺术和雄心。而它的发现源于一位女性——伊迪丝·普雷蒂——对自己直觉的信任。"}]'
-    },
-
-    {
-id:'b5',name_en:'Lewis Chessmen',name_zh:'刘易斯棋子',icon:'ic-chess',
-date_en:'1150–1200',date_zh:'1150-1200年',cat_en:'Walrus Ivory Chess',cat_zh:'海象牙棋子',
-mat:'Walrus ivory, whale tooth',dims:'Kings ~8–10 cm',origin_en:'Found Lewis, Scotland',origin_zh:'苏格兰刘易斯岛',
-desc_en:'93 tiny personalities — kings stern, queens melancholy, warders biting shields in berserker frenzy.',desc_zh:'93个小人物——国王威严，王后忧郁，看守狂咬盾牌。',
-deep_en:'Inspired the wizard\'s chess scene in Harry Potter. 82 at British Museum, 11 at National Museum of Scotland.',deep_zh:'启发了《哈利·波特》的巫师棋场景。大英博物馆82枚，苏格兰国家博物馆11枚。',
-facts_en:['Inspired Harry Potter wizard chess','Warders biting shields = real berserkers','82 pieces at BM, 11 in Scotland'],facts_zh:['启发了哈利·波特巫师棋','咬盾牌的看守=真实狂暴战士','大英82枚 苏格兰11枚'],
-rel:[{id:'b4',name_en:'Sutton Hoo Helmet',name_zh:'萨顿胡头盔',r_en:'British medieval',r_zh:'英国中世纪'}],
-quiz:{q_en:['How many at BM?','Material?'],a_en:['82','Walrus ivory'],q_zh:['大英藏多少？','材料？'],a_zh:['82枚','海象牙']},
-official_en:'<p>The Lewis Chessmen are a group of 93 carved chess pieces made from walrus ivory and whale tooth, dating to around 1150–1200. They were discovered in 1831 on the Isle of Lewis in the Outer Hebrides, Scotland.</p><p>The pieces include seated kings and queens, mitred bishops, knights on horseback, standing warders biting their shields, and pawns in the form of obelisks. Today, 82 pieces are held by the British Museum and 11 by the National Museum of Scotland. They are believed to have been carved in Trondheim, Norway, when the Hebrides were part of the Kingdom of Norway.</p><p>They represent the largest single surviving group of objects made for recreational purposes from the medieval period.</p>',official_zh:'<p>刘易斯棋子是一组93枚雕刻棋子，材质为海象牙和鲸齿，制作年代约1150至1200年。1831年在苏格兰外赫布里底群岛刘易斯岛被发现。</p><p>棋子包括端坐的国王与王后、戴主教冠的主教、骑马的骑士、咬盾牌的站立卫兵以及方尖碑形的卒子。目前大英博物馆收藏82枚，苏格兰国家博物馆收藏11枚。据信它们是在挪威特隆赫姆制作的，当时赫布里底群岛属于挪威王国。</p><p>它们代表了中世纪娱乐用品中最大单组存世品。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "The chessmen are small — kings only about 8 cm tall — but their personalities are huge. Scan the group: the kings sit rigidly gripping swords, the queens press hands to cheeks in melancholy. It feels like a medieval drama frozen in walrus ivory."}, {"step": 2, "title": "Observe the Details", "desc": "Focus on a warder (rook). He bites the top edge of his shield — a gesture of battle fury known from Norse sagas. The knights ride stocky, pony-like horses. Every face is unique, carved with individual expressions."}, {"step": 3, "title": "Analyse the Craft", "desc": "Walrus ivory is denser than elephant ivory, with a distinctive grain. The carvers used fine chisels to create deep folds in robes and intricate throne decorations. They were likely carved in Trondheim, Norway — a centre of ivory carving in the 12th century."}, {"step": 4, "title": "Historical Context", "desc": "12th-century Lewis was part of the Kingdom of Norway. Chess had travelled from India through Persia to reach Europe by about 1000 AD. By 1150 it was a fixture of aristocratic life. The pieces may have belonged to a merchant travelling between Norway and Ireland."}, {"step": 5, "title": "Why It Matters", "desc": "The Lewis Chessmen remind us that people a thousand years ago laughed, competed, and whiled away long nights over a board game. The warder connects to berserkers of Norse legend. They are ambassadors of a maritime North Atlantic world where Norse, Celtic and Christian cultures coexisted."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "棋子很小——国王仅约8厘米高——但个性巨大。扫视这组棋子：国王僵直端坐，紧握横放膝上的宝剑；王后以手托腮，满面惆怅。仿佛一场中世纪戏剧凝固在海象牙中。"}, {"step": 2, "title": "细节观察", "desc": "聚焦一个卫兵（车）——他正啃咬着盾牌上缘，这是北欧传奇中广为人知的狂战士战怒姿态。骑士骑着小矮马般的坐骑。每一张面孔都是独一无二的。"}, {"step": 3, "title": "技法解析", "desc": "海象牙比象牙更致密，带有独特纹理。雕刻师使用细凿刻出衣袍的深邃皱褶和精美纹饰。棋子很可能产自挪威特隆赫姆——12世纪海象牙雕刻的中心。"}, {"step": 4, "title": "历史语境", "desc": "12世纪时刘易斯岛属于挪威王国。国际象棋从印度经波斯传入欧洲约在公元1000年。到1150年已是全欧贵族生活的固定消遣。这些棋子可能属于一位在挪威与爱尔兰之间经商的商人。"}, {"step": 5, "title": "深层感悟", "desc": "刘易斯棋子提醒我们：一千年前的人也会欢笑、竞争、消磨漫长的夜晚。咬盾牌的卫兵与北欧传奇中的狂战士直接相连。它们是北大西洋海上世界的使者——北欧、凯尔特和基督教文化共存并共同创造美的见证。"}]'
-    },
-
-    {
-id:'b6',name_en:'Benin Bronzes',name_zh:'贝宁青铜器',icon:'ic-relief',
-date_en:'16th–18th C',date_zh:'16-18世纪',cat_en:'Brass Plaques',cat_zh:'黄铜浮雕',
-mat:'Brass (copper alloy)',dims:'Plaques ~45–50 cm',origin_en:'Benin Kingdom, Nigeria',origin_zh:'贝宁王国 尼日利亚',
-desc_en:'Supreme pre-colonial African art — lost-wax casting rivaling Renaissance Europe.',desc_zh:'前殖民时代非洲艺术的至高成就。失蜡法精妙可比文艺复兴欧洲。',
-deep_en:'1897 British punitive expedition looted and burned Benin City. Global symbol of colonial restitution.',deep_zh:'1897年英国讨伐军洗劫并烧毁贝宁城。殖民归还运动的全球象征。',
-facts_en:['Mounted on palace pillars','Lost-wax technique rivals modern tech','Nigeria building Edo Museum for returns'],facts_zh:['镶嵌在王宫木柱上','失蜡法精妙现代技术无法复制','尼日利亚建设埃多博物馆安放归还文物'],
-rel:[{id:'b2',name_en:'Parthenon Marbles',name_zh:'帕特农雕塑',r_en:'Restitution',r_zh:'归还争议'}],
-quiz:{q_en:['Casting technique?','What happened in 1897?'],a_en:['Lost-wax','British looted Benin City'],q_zh:['铸造技术？','1897年发生了什么？'],a_zh:['失蜡法','英国洗劫贝宁城']},
-official_en:'<p>The Benin Bronzes are a group of brass and bronze plaques and sculptures that once decorated the royal palace of the Kingdom of Benin, in present-day Nigeria. Created between the 16th and 18th centuries, they depict the Oba (king), courtiers, warriors, Portuguese traders and symbolic animals.</p><p>The plaques were cast using the lost-wax technique, in which a wax model is encased in clay, the wax melted out, and molten brass poured into the cavity. Benin\'s brass-casters achieved a level of technical mastery that astonished the first Europeans to see the works.</p><p>In 1897, a British punitive expedition looted and burned Benin City, dispersing thousands of artworks across the world. The British Museum holds over 900 Benin objects. The bronzes have become a global symbol of the debate over colonial restitution.</p>',official_zh:'<p>贝宁青铜器是一组曾装饰贝宁王国（今尼日利亚）王宫的浮雕铜板与雕塑。制作于16至18世纪，描绘了国王（奥巴）、朝臣、武士、葡萄牙商人以及象征性动物。</p><p>这些铜板采用失蜡法铸造：先以蜡制作模型，再裹上黏土，加热使蜡融化流出，将黄铜熔液注入空腔。贝宁的铸铜匠人展现出的技艺水平令最早见到这些作品的欧洲人惊叹不已。</p><p>1897年，一支英国讨伐军洗劫并焚毁了贝宁城，数千件艺术品流散世界各地。大英博物馆藏有超过900件贝宁器物。这些青铜器已成为殖民归还辩论的全球象征。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "Stand before the wall of plaques in the Africa gallery. The dark brass glows under museum lighting. Dozens of rectangular relief panels line up like pages of a metal book — a royal chronicle cast in brass before the written word reached this kingdom."}, {"step": 2, "title": "Observe the Details", "desc": "Pick one plaque and study it. The Oba\'s head is proportionally larger — the seat of destiny and wisdom in Benin art. Coral beads adorn his neck and crown, denoting divine status. Portuguese traders appear with long hair and distinctive hats."}, {"step": 3, "title": "Analyse the Craft", "desc": "The lost-wax process requires extraordinary skill: wax model encased in clay, melted out, brass at over 1,000°C poured in. High-zinc brass flows into fine details. The plaques are thinner than European equivalents of the same period — a technical feat."}, {"step": 4, "title": "Historical Context", "desc": "The Kingdom of Benin was a powerful West African state. By the 16th century it controlled a vast trade network and maintained diplomatic relations with Portugal. The plaques served as visual records of royal history in a society where oral tradition was paramount."}, {"step": 5, "title": "Why It Matters", "desc": "The Benin Bronzes shatter colonial-era myths about African art being primitive. They are among the most sophisticated cast-metal works ever created anywhere. As Nigeria builds the Edo Museum of West African Art, the bronzes have become catalysts for a global conversation about justice and the future of museums."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "站在非洲展厅的铜板墙前。暗色黄铜在博物馆灯光下辉映。数十块矩形浮雕板如金属书页整齐排列——一部在有文字记录之前以黄铜铸造的王室编年史。"}, {"step": 2, "title": "细节观察", "desc": "选择一块铜板细看。奥巴的头部按比例放大——在贝宁艺术中头部是命运和智慧的居所。珊瑚珠装饰着他的脖颈和王冠。葡萄牙商人以长发和独特帽子形象出现。"}, {"step": 3, "title": "技法解析", "desc": "失蜡法要求极高技艺：先用蜡塑形，裹上黏土，加热融蜡，注入超千度黄铜熔液。高锌黄铜流动性好，细节更锐利。这些铜板比同期欧洲铸造品更薄——一项技术壮举。"}, {"step": 4, "title": "历史语境", "desc": "贝宁王国是一个强大的西非国家。16世纪时它控制着庞大贸易网络，与葡萄牙保持外交关系。这些铜板在一个以口述传统为主的社会中充当王室历史的视觉记录。"}, {"step": 5, "title": "深层感悟", "desc": "贝宁青铜器粉碎了殖民时代关于非洲艺术原始的谬论。它们是人类创造的最精妙的铸造金属作品之一。随着尼日利亚建设埃多西非艺术博物馆，这些青铜器已成为关于正义和博物馆未来的全球对话的催化剂。"}]'
-    },
-
-    {
-id:'b7',name_en:'The Great Wave',name_zh:'神奈川冲浪里',icon:'ic-wave',
-date_en:'c.1831',date_zh:'约1831年',cat_en:'Woodblock Print',cat_zh:'多色木版画',
-mat:'Ink on paper',dims:'25.7×37.9 cm',origin_en:'Edo (Tokyo), Japan',origin_zh:'日本 江户',
-desc_en:'Hokusai\'s iconic print — Prussian blue wave, tiny Mount Fuji, fishermen bowing to nature\'s power.',desc_zh:'北斋的标志性版画——普鲁士蓝巨浪、渺小的富士山、向自然之力低头的渔夫。',
-deep_en:'Part of Thirty-Six Views of Mount Fuji. Shared the new synthetic Prussian blue with Van Gogh and Monet.',deep_zh:'《富岳三十六景》之一。进口的普鲁士蓝颜料启迪了梵高与莫奈。',
-facts_en:['Used Prussian blue — a chemical pigment','Part of "36 Views of Mount Fuji" series','Influenced Van Gogh, Monet, Debussy'],facts_zh:['使用进口普鲁士蓝化学颜料','《富岳三十六景》系列之一','影响了梵高、莫奈、德彪西'],
-rel:[{id:'b10',name_en:'Tara Statue',name_zh:'度母像',r_en:'Asian art',r_zh:'亚洲艺术'}],
-quiz:{q_en:['Which mountain?','Main colour?'],a_en:['Mount Fuji','Prussian blue'],q_zh:['什么山？','主要颜色？'],a_zh:['富士山','普鲁士蓝']},
-official_en:'<p>Under the Wave off Kanagawa, commonly known as The Great Wave, is a colour woodblock print created by the Japanese master Katsushika Hokusai around 1831. It belongs to the series Thirty-Six Views of Mount Fuji, though it is Mount Fuji itself that appears small and serene in the distance, dwarfed by the towering, curling wave in the foreground.</p><p>The print employs an innovative synthesis of Japanese tradition and European perspective. The dramatic curve of the wave draws the eye into a dynamic composition, while the use of the recently imported synthetic pigment Prussian blue gave the print a depth and vibrancy previously unseen in Japanese printmaking. Hokusai was 72 when he created this masterpiece.</p><p>After Japan opened to the West, The Great Wave swept through Europe. It directly influenced artists from Van Gogh and Monet to the composer Debussy, whose La Mer was inspired by the print.</p>',official_zh:'<p>《神奈川冲浪里》（通常简称为《巨浪》）是日本大师葛饰北斋约1831年创作的多色木版画。它属于《富岳三十六景》系列，但前景巨浪的巍峨与远景富士山的渺小宁静形成鲜明对比。</p><p>这幅作品在传统日本版画技法中融入欧洲透视法。巨浪夸张的弧线将视线导向充满张力的构图，而新近进口的合成颜料普鲁士蓝赋予画面前所未有的深度与生动感。北斋创作这幅杰作时已72岁高龄。</p><p>日本开国后，《巨浪》席卷欧洲。它深刻影响了梵高、莫奈等艺术家，德彪西的管弦乐作品《大海》也受其启发。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "The wave dominates — its curling crest like claws reaching down to seize the boats. Mount Fuji sits calmly in the distance. The sky has an eerie yellowish tint. Feel the tension: nature\'s fury versus human fragility, captured in a single frozen moment."}, {"step": 2, "title": "Observe the Details", "desc": "Count the boats — three oshiokuri-bune, fast cargo boats, each carrying eight men. They bow low, gripping the sides. The wave\'s foam breaks into tiny white claws, a motif Hokusai invented. Look for Mount Fuji: small, snow-capped, perfectly centred in the composition, almost swallowed by the wave."}, {"step": 3, "title": "Analyse the Craft", "desc": "This is nishiki-e (brocade picture) — multi-block colour printing. Each colour requires a separate carved wood block, precisely registered. The deep blue is Prussian blue (bero-ai), a synthetic pigment imported from Europe after 1820. It does not fade, unlike traditional indigo. The key block (outlines) was printed last in black."}, {"step": 4, "title": "Historical Context", "desc": "Edo-period Japan was officially closed to foreigners, but Dutch traders brought European prints and pigments via Nagasaki. Hokusai studied these foreign perspectives hungrily. The Great Wave was a bestseller — thousands of impressions were pulled from the original blocks until the lines grew soft and worn."}, {"step": 5, "title": "Why It Matters", "desc": "The Great Wave is the most reproduced image in art history. It represents the moment Eastern and Western artistic traditions collided with explosive creativity. The wave can be read as Japan itself — a nation about to be swept into the modern world. Ask yourself: is the wave threatening or beautiful? Hokusai\'s genius is that the answer is both."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "巨浪占据主导——卷曲的浪尖如利爪般伸向小船。富士山在远方静立。天空泛着怪异的淡黄色调。感受这种张力：自然之怒与人类之脆弱，凝固在一个瞬间。"}, {"step": 2, "title": "细节观察", "desc": "数一数船只——三艘押送船（快速货船），每艘载有八名船员。他们低头弓身，紧抓船舷。浪花碎裂成白色小爪——这是北斋发明的标志性图案。寻找富士山：小巧、积雪覆盖、完美居中于画面。"}, {"step": 3, "title": "技法解析", "desc": "这是锦绘——多版套色印刷。每种颜色需单独雕刻一块木板并精确对位。深邃的蓝色是普鲁士蓝，1820年后从欧洲进口的合成颜料，不会像传统靛蓝那样褪色。主版（轮廓）以黑墨最后印制。"}, {"step": 4, "title": "历史语境", "desc": "江户时代的日本官方闭关锁国，但荷兰商人经由长崎带来了欧洲版画和颜料。北斋如饥似渴地研习这些外来透视。《巨浪》当年是畅销品——原版雕刻被反复印制直到线条磨损变软。"}, {"step": 5, "title": "深层感悟", "desc": "《巨浪》是艺术史上被复制最多的图像。它代表着东西方艺术传统碰撞爆发出创造力的瞬间。巨浪可以解读为日本本身——一个即将被卷入现代世界的国家。问你自己：巨浪是威胁还是美的？北斋的天才之处在于：两者皆是。"}]'
-    },
-
-    {
-id:'b8',name_en:'Hoa Hakananai\'a',name_zh:'摩艾石像',icon:'ic-moai',
-date_en:'c.AD 1000',date_zh:'约公元1000年',cat_en:'Basalt Statue',cat_zh:'玄武岩石像',
-mat:'Basalt',dims:'2.42 m, ~4 tons',origin_en:'Easter Island (Rapa Nui)',origin_zh:'复活节岛（拉帕努伊）',
-desc_en:'Lost friend — Hoa Hakananai\'a means "stolen or hidden friend." Birdman cult carvings on its back.',desc_zh:'失落之友——Hoa Hakananai\'a意为"被盗的或被藏起来的朋友"。背部刻有鸟人崇拜图案。',
-deep_en:'~900 moai on Rapa Nui. Carved from Rano Raraku tuff. Rapa Nui people request its return.',deep_zh:'复活节岛现存约900尊摩艾。开采自拉诺拉拉库凝灰岩。拉帕努伊人请求归还。',
-facts_en:['Name means "stolen or hidden friend"','~900 moai exist on the island','Back carved with Birdman cult symbols'],facts_zh:['名字意为"被盗的或被藏起来的朋友"','岛上现存约900尊','背部刻有鸟人崇拜符号'],
-rel:[{id:'b5',name_en:'Lewis Chessmen',name_zh:'刘易斯棋子',r_en:'Island nations',r_zh:'岛屿文化'}],
-quiz:{q_en:['Island name?','What\'s on its back?'],a_en:['Rapa Nui','Birdman carvings'],q_zh:['岛屿名称？','背部刻有什么？'],a_zh:['拉帕努伊','鸟人崇拜图案']},
-official_en:'<p>Hoa Hakananai\'a is a moai (ancestral figure) from Easter Island (Rapa Nui), carved from basalt around AD 1000–1600. The name translates as \'stolen or hidden friend.\' It stands 2.42 metres tall and weighs around four tons.</p><p>Unlike most moai carved from volcanic tuff, Hoa Hakananai\'a is sculpted from hard basalt, giving it a smoother, darker finish. When removed from the island in 1868 by the crew of HMS Topaze and presented to Queen Victoria, it was discovered that the statue\'s back is covered with later carvings associated with the Birdman cult (Tangata Manu) — a ritual that replaced moai worship on Rapa Nui after ecological collapse.</p><p>Today, the Rapa Nui people consider Hoa Hakananai\'a one of the most spiritually significant of their ancestors and have formally requested its return.</p>',official_zh:'<p>Hoa Hakananai\'a 是来自复活节岛（拉帕努伊）的摩艾（祖先石像），由玄武岩雕刻而成，年代约公元1000至1600年。其名称意为“被盗的或被藏起来的朋友”。石像高2.42米，重约4吨。</p><p>不同于大多数用火山凝灰岩雕刻的摩艾，Hoa Hakananai\'a 使用坚硬的玄武岩，表面更光滑、色泽更深。1868年，英国皇家海军黄玉号船员将其从岛上移走并呈献给维多利亚女王时，发现石像背部覆盖着后来雕刻的鸟人崇拜（Tangata Manu）图案——这是拉帕努伊在生态崩溃后取代摩艾崇拜的一种仪式。</p><p>今天，拉帕努伊人将Hoa Hakananai\'a视为祖先中最具灵性的一位，并已正式要求将其归还。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "Hoa Hakananai\'a stands in the Wellcome Gallery, its dark basalt surface absorbing light. The face is minimalist — deep-set eyes, sharp nose, thin compressed lips, elongated ears. It is powerfully still, as if waiting. Walk around it: the back tells a different story."}, {"step": 2, "title": "Observe the Details", "desc": "Move to the back of the statue. Here you will find low-relief carvings of the Birdman cult — frigate birds, human-bird hybrid figures, and ceremonial dance paddles (ao). These were carved centuries after the moai was first erected, marking a profound cultural shift on Rapa Nui."}, {"step": 3, "title": "Analyse the Craft", "desc": "Carved from basalt — much harder than the volcanic tuff used for most moai. This requires tremendous skill and patience, likely using stone tools. The smooth finish suggests extensive polishing. The later Birdman reliefs are shallower, carved with metal tools introduced by Europeans."}, {"step": 4, "title": "Historical Context", "desc": "Around 500 moai were erected on Rapa Nui between AD 1000 and 1600. After deforestation and resource depletion, the moai cult collapsed and was replaced by the Birdman cult, in which competitors swam to a nearby islet to retrieve the first sooty tern egg of the season. Hoa Hakananai\'a was likely moved from its original ahu (platform) to a Birdman ceremonial house."}, {"step": 5, "title": "Why It Matters", "desc": "Hoa Hakananai\'a embodies two eras of Rapa Nui history in one object: the moai builders and the Birdman cult that succeeded them. Its name — \'stolen friend\' — carries haunting prescience. For the Rapa Nui people, moai are not art but living ancestors. Its presence in London raises fundamental questions about what we find in museums."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "Hoa Hakananai\'a 矗立在惠康展厅中，墨色玄武岩吸收着光线。面部极简——深陷的双眼、锐利的鼻子、薄而紧抿的嘴唇、拉长的耳朵。它有力地静止着，仿佛在等待。绕到背后：背面的故事全然不同。"}, {"step": 2, "title": "细节观察", "desc": "走到石像背后。这里刻有鸟人崇拜的浅浮雕——军舰鸟、人鸟合体的形象、祭仪舞蹈桨（ao）。这些雕刻是在摩艾首次竖立数百年后才添上的，标志着拉帕努伊文化的一次深刻转变。"}, {"step": 3, "title": "技法解析", "desc": "使用玄武岩雕刻——比大多数摩艾所用的火山凝灰岩坚硬得多。这需要极大的技巧和耐心，很可能是使用石制工具完成的。光滑的表面表明经过了大量抛光。后来的鸟人浮雕更浅，使用欧洲人传入的金属工具雕刻。"}, {"step": 4, "title": "历史语境", "desc": "公元1000至1600年间拉帕努伊岛上竖立了约500尊摩艾。在森林砍伐和资源枯竭后，摩艾崇拜崩溃，被鸟人崇拜取代——参赛者游泳到邻近小岛夺取当季第一枚乌燕鸥蛋的仪式。Hoa Hakananai\'a 很可能从原来的祭祀平台被移到了鸟人仪式场所。"}, {"step": 5, "title": "深层感悟", "desc": "Hoa Hakananai\'a 在一件物品中容纳了拉帕努伊两个时代的历史：摩艾建造者与其后继的鸟人崇拜。它的名字——\'被盗的朋友\'——带着令人心悸的先见之明。对拉帕努伊人来说摩艾不是艺术品而是活着的祖先。它在伦敦的存在引发了我们关于博物馆中能看到什么的根本性追问。"}]'
-    },
-
-    {
-id:'b9',name_en:'Standard of Ur',name_zh:'乌尔军旗',icon:'ic-standard',
-date_en:'c.2600 BC',date_zh:'约公元前2600年',cat_en:'Mosaic Box',cat_zh:'镶嵌木盒',
-mat:'Shell, lapis lazuli, red limestone, bitumen',dims:'21.6×49.5 cm',origin_en:'Ur, Iraq',origin_zh:'伊拉克 乌尔',
-desc_en:'War side — chariots trample enemies. Peace side — banquet with harp and lyre. 4,600-year-old storyboard.',desc_zh:'战争面——战车碾压敌人。和平面——箜篌伴奏的宴饮。4600年历史的故事板。',
-deep_en:'Possibly a sound-box of a musical instrument. Lapis lazuli travelled 2,500 km from Afghanistan. Possibly the world\'s oldest narrative art.',deep_zh:'可能是一件乐器的共鸣箱。青金石从阿富汗远行2500公里。可能是世界最早的叙事艺术。',
-facts_en:['Lapis lazuli from Afghanistan','Possible sound-box of a harp','One of earliest narrative artworks'],facts_zh:['青金石来自阿富汗','可能是一把竖琴的共鸣箱','最早叙事艺术品之一'],
-rel:[{id:'b1',name_en:'Rosetta Stone',name_zh:'罗塞塔石碑',r_en:'Ancient civilisations',r_zh:'古文明'}],
-quiz:{q_en:['Two sides?','Blue material?'],a_en:['War and Peace','Lapis lazuli'],q_zh:['两面内容？','蓝色材质？'],a_zh:['战争与和平','青金石']},
-official_en:'<p>The Standard of Ur is a Sumerian artefact from the Royal Cemetery at Ur in present-day Iraq, dating to around 2600 BC. It is a hollow wooden box inlaid with mosaic panels made from shell, red limestone and lapis lazuli set into bitumen.</p><p>The two long sides depict contrasting scenes, commonly labelled \'War\' and \'Peace.\' The War side shows a Sumerian army in battle: chariots trampling enemies, soldiers leading prisoners. The Peace side depicts a royal banquet: the king feasts while musicians play the harp and lyre, and subjects bring offerings of animals, fish and goods.</p><p>The box\'s original function is unknown. It may have been the sound-box of a musical instrument, or a standard carried on a pole. It is one of the earliest surviving examples of narrative art, telling a complete story in visual form.</p>',official_zh:'<p>乌尔军旗是一件苏美尔文物，出土于今伊拉克乌尔王陵，年代约公元前2600年。它是一个中空的木盒，表面以贝壳、红石灰岩和青金石镶嵌于沥青之上构成马赛克画面。</p><p>盒子两个长面描绘了对比鲜明的场景，通常称为“战争”与“和平”。战争面展示了苏美尔军队作战：战车碾压敌人，士兵押解俘虏。和平面则描绘了王室宴会：国王宴饮，乐师演奏竖琴与里拉琴，臣民进献牲畜、鱼和货物。</p><p>木盒的原始功能至今未知。可能是一件乐器的共鸣箱，也可能是安装于杆上的军旗。它是早期叙事艺术最古老的存世范例之一，以视觉形式讲述了一个完整故事。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "The Standard is small — about the size of a shoebox — but it tells two complete stories. Walk around it. One side is all violence and order; the other is celebration and abundance. It is like the world\'s oldest comic strip, frozen in shell and lapis."}, {"step": 2, "title": "Observe the Details", "desc": "On the War side, start at the bottom: chariots charge, bodies lie under hooves. The middle register shows infantry in formation. At the top, prisoners are presented to the king, who is taller than everyone. On the Peace side, follow the procession of goods — sheep, fish, bundles — upward to the banquet scene."}, {"step": 3, "title": "Analyse the Craft", "desc": "The box is wood, now decayed — the mosaic is what survives. Shell figures are cut from the Red Sea area; the brilliant blue lapis lazuli travelled 2,500 km from Badakhshan in Afghanistan; red limestone came from India or Iran. These trade distances tell us Ur was a global centre. The figures are stylised: heads in profile, chests frontal — the Sumerian canon."}, {"step": 4, "title": "Historical Context", "desc": "Ur around 2600 BC was one of the world\'s first cities, a Sumerian city-state along the Euphrates. The Royal Cemetery contained 16 \'royal\' tombs with dozens of sacrificed attendants. The Standard was found in one of these tombs, near the shoulder of a man — perhaps he was the musician who played it."}, {"step": 5, "title": "Why It Matters", "desc": "The Standard of Ur is a 4,600-year-old argument for the power of images. It proves that storytelling through sequential art — the ancestor of comics, film, and storyboards — is as old as civilisation itself. And the lapis lazuli, carried across mountains from Afghanistan, reminds us that even the ancient world was deeply interconnected."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "军旗很小——大约一个鞋盒大小——但它讲述着两个完整的故事。绕它走一圈。一面充满暴力和秩序；另一面则是庆祝与富饶。它像是世上最古老的连环漫画，凝固在贝壳与青金石之中。"}, {"step": 2, "title": "细节观察", "desc": "在战争面，从底部开始：战车冲锋，尸体横陈马蹄之下。中层是列队前进的步兵。最上层，俘虏被带到国王面前——国王的身高明显大于其他所有人。在和平面，追随货品的队列——羊、鱼、包裹——一路向上至宴会场景。"}, {"step": 3, "title": "技法解析", "desc": "木盒已朽烂——幸存的是马赛克。贝壳人物来自红海地区；璀璨的蓝色青金石从阿富汗巴达赫尚远行2500公里而来；红石灰岩来自印度或伊朗。这些贸易距离告诉我们乌尔曾是世界中心。人物造型风格化：侧脸、正胸——苏美尔正典。"}, {"step": 4, "title": "历史语境", "desc": "公元前2600年的乌尔是世界上最早的城市之一，沿着幼发拉底河建立的苏美尔城邦。王陵包含16座“王室”大墓，随葬数十名殉葬侍从。军旗发现于其中一座墓中，位于一名男子肩旁——或许他就是那位演奏者。"}, {"step": 5, "title": "深层感悟", "desc": "乌尔军旗是一份有着4600年历史的关于图像力量的论证。它证明了通过连续画面讲故事——漫画、电影和故事板的祖先——与文明本身同样古老。而那从阿富汗翻山越岭而来的青金石提醒我们：即便在古代，世界也早已深深相连。"}]'
-    },
-
-    {
-id:'b10',name_en:'Tara Statue',name_zh:'度母像',icon:'ic-tara',
-date_en:'8th–9th C',date_zh:'8-9世纪',cat_en:'Gilt Bronze',cat_zh:'青铜镀金',
-mat:'Bronze, gold',dims:'~143 cm',origin_en:'Sri Lanka',origin_zh:'斯里兰卡',
-desc_en:'Serene female Bodhisattva — exquisite lost-wax casting. Right hand in varada mudra offering compassion.',desc_zh:'宁静的女身菩萨——失蜡法精铸。右手施与愿印，给予慈悲。',
-deep_en:'Possibly from Anuradhapura. The gentle sway of her body (tribhanga) radiates grace.',deep_zh:'可能出自阿努拉德普勒。身体的三屈式曲线散发出优雅的韵律。',
-facts_en:['Largest surviving Sri Lankan bronze','Lost-wax casting in solid bronze','Gilding still visible on face & chest'],facts_zh:['存世最大的斯里兰卡青铜像','失蜡法实心青铜铸造','面部和胸部仍可见镀金'],
-rel:[{id:'b7',name_en:'The Great Wave',name_zh:'神奈川冲浪里',r_en:'Asian art',r_zh:'亚洲艺术'}],
-quiz:{q_en:['Which country?','Her hand gesture?'],a_en:['Sri Lanka','Varada mudra (gift-giving)'],q_zh:['哪个国家？','手印名称？'],a_zh:['斯里兰卡','与愿印（施予）']},
-official_en:'<p>The Tara Statue is a magnificent gilt-bronze figure of the Buddhist deity Tara, dating to the 8th–9th century, from Sri Lanka. Standing 143 cm tall, it is the largest surviving Sri Lankan bronze sculpture.</p><p>Tara is the female bodhisattva of compassion, the consort of Avalokiteshvara. Her right hand is lowered in varada mudra, the gesture of granting wishes and offering compassion. Her left hand once held a lotus flower. Her body adopts the graceful triple-bend (tribhanga) pose, with a gentle sway. The figure was cast in solid bronze using the lost-wax technique and then gilded with gold, traces of which are still visible on her face and chest.</p><p>Likely from the great Buddhist centre of Anuradhapura, the statue embodies the height of South Asian Buddhist art and the spread of Mahayana Buddhism across the Indian Ocean.</p>',official_zh:'<p>度母像是一尊宏伟的青铜镀金佛教造像，年代为8至9世纪，来自斯里兰卡。高143厘米，是存世最大的斯里兰卡青铜雕塑。</p><p>度母是慈悲的女性菩萨化身，观世音菩萨的配偶。她的右手下垂施与愿印——给予愿望和慈悲的姿态。左手曾持一朵莲花。身体采用了优雅的三屈式（tribhanga）姿态，带着柔和的摆动。雕像以失蜡法实心青铜铸造，然后镀金，面部和胸部仍可见金色痕迹。</p><p>很可能来自伟大的佛教中心阿努拉德普勒，这尊雕像体现了南亚佛教艺术的巅峰以及大乘佛教跨越印度洋的传播。</p>',
-guide_en:'[{"step": 1, "title": "First Impression (5 seconds)", "desc": "Tara stands in a quiet alcove of the Asia gallery, her gilded face glowing softly. She is life-sized — you feel her presence as a real person. The gentle curve of her body suggests movement frozen in time. She looks at you with half-closed eyes, serene yet alert."}, {"step": 2, "title": "Observe the Details", "desc": "Look at her right hand, lowered with palm facing outward — this is varada mudra, the gesture of giving, of compassion freely offered. Her left hand would have held a lotus, now lost. Her hair is piled in an elaborate topknot. Faint traces of gold are still visible on her face, chest and crown."}, {"step": 3, "title": "Analyse the Craft", "desc": "Cast in solid bronze using the lost-wax technique, then gilded. The sculptor achieved remarkable precision in the facial features and the flowing lines of her robe. The tribhanga (triple bend) pose — head tilted, hip swayed, weight on one leg — creates a sinuous rhythm that makes the bronze feel almost weightless."}, {"step": 4, "title": "Historical Context", "desc": "Sri Lanka was a major centre of Theravada Buddhism, but the presence of Tara — a Mahayana deity — shows the island\'s cosmopolitan religious character. Anuradhapura, the capital, had ties with India, Southeast Asia and China via maritime trade routes. Tara was worshipped as a saviour goddess who protected travellers and merchants."}, {"step": 5, "title": "Why It Matters", "desc": "The Tara Statue is rare testimony to a female-centred spiritual tradition. In a world of patriarchal religious art, Tara stands as a sovereign goddess of compassion — not subservient, not decorative, but powerful in her own right. Her regal serenity speaks across twelve centuries to our continuing need for grace in a turbulent world."}]',guide_zh:'[{"step": 1, "title": "整体印象（5秒）", "desc": "度母立在亚洲展厅一个安静的角落，镀金的面庞微微发光。她与真人等大——你能感受到她作为一个真实人物的存在感。身体的柔和曲线暗示着凝固在时光中的律动。她半闭着眼睛注视你，宁静而警觉。"}, {"step": 2, "title": "细节观察", "desc": "看她的右手，垂下掌心向外——这是与愿印，给予的姿态，是自由施予的慈悲。左手曾持莲花，今已遗失。头发盘成精致的顶髻。面部、胸口和头冠仍依稀可见金色痕迹。"}, {"step": 3, "title": "技法解析", "desc": "以失蜡法实心青铜铸造，再镀金。雕塑家对面部特征的精细刻画和衣袍流畅线条的把握达到了惊人精度。三屈式姿态——头部微倾、腰肢摆动、重心落于一条腿——创造出一种蜿蜒的韵律，令青铜仿佛失去了重量。"}, {"step": 4, "title": "历史语境", "desc": "斯里兰卡是上座部佛教的重要中心，但度母——一位大乘佛教神祇——的存在显示了这个岛国宗教的世界性。首都阿努拉德普勒通过海上贸易路线与印度、东南亚和中国保持联系。度母被奉为保护旅行者和商人的救度女神。"}, {"step": 5, "title": "深层感悟", "desc": "度母像是女性精神传统珍贵的见证。在一个充满男性化宗教艺术的世界里，度母作为慈悲的至高女神独立存在着——不从属、不装饰，以自身的力量存在。她王者的宁静穿越十二个世纪，回应着我们在这个动荡世道中对优雅的持续渴望。"}]'
-    },
-  ],
-  louvre:[
-    {id:'l1',name_en:'Mona Lisa',name_zh:'蒙娜丽莎',icon:'ic-portrait',date_en:'1503–1519',date_zh:'1503-1519年',cat_en:'Oil on Poplar Panel',cat_zh:'杨木板油画',mat:'Oil on poplar',dims:'77×53 cm',origin_en:'Leonardo da Vinci, Florence',origin_zh:'达芬奇 佛罗伦萨',desc_en:'The most famous painting in the world. Her smile, the sfumato technique, the imaginary landscape — a portrait that became a myth.',desc_zh:'世界上最著名的画作。神秘的微笑、晕涂法、虚构的风景——一幅成为神话的肖像。',deep_en:'Stolen in 1911 by Vincenzo Peruggia — hidden under his bed for two years. The theft made it famous. Duchamp drew a moustache on a postcard copy in 1919 (L.H.O.O.Q.).',deep_zh:'1911年被佩鲁贾盗走——藏在床下两年。正是这次盗窃让它名声大噪。杜尚1919年在明信片上给她画了胡子。',facts_en:['Stolen 1911 — hidden under a bed for 2 years','Duchamp drew a moustache on her','Sits behind bulletproof glass since 1956'],facts_zh:['1911年被盗——床下藏了两年','杜尚给她画了胡子','1956年起在防弹玻璃后展出'],rel:[],quiz:{q_en:['Artist?','When was it stolen?'],a_en:['Leonardo da Vinci','1911'],q_zh:['作者？','哪年被盗？'],a_zh:['达芬奇','1911年']}},
-    {id:'l2',name_en:'Winged Victory',name_zh:'胜利女神',icon:'ic-wings',date_en:'c.190 BC',date_zh:'约公元前190年',cat_en:'Marble Sculpture',cat_zh:'大理石雕塑',mat:'Parian marble',dims:'H 2.45 m (without head)',origin_en:'Samothrace, Greece',origin_zh:'希腊 萨莫色雷斯',desc_en:'Nike of Samothrace — the goddess of victory alighting on a ship\'s prow. Wind whips through her garments; she has no head but you feel her presence.',desc_zh:'萨莫色雷斯的胜利女神——降落在船首的女神。海风穿透衣袍；她没有头颅，但你感受到她的存在。',deep_en:'Placed atop the Daru staircase at the Louvre since 1884. The prow is a separate block. Her right hand was found separately in 1950 — she was likely cupping it to her mouth, shouting.',deep_zh:'1884年起安放在卢浮宫达鲁楼梯顶端。船首是独立石块。右手1950年单独发现——她可能正将手拢在嘴边呐喊。',facts_en:['Stands atop the iconic Daru staircase','Her right hand was found in 1950','Likely depicted shouting victory'],facts_zh:['矗立在标志性的达鲁楼梯顶端','右手1950年才被找到','可能在呐喊胜利'],rel:[{id:'l3',name_en:'Venus de Milo',name_zh:'米洛的维纳斯',r_en:'Both are iconic armless Hellenistic sculptures',r_zh:'同为无臂希腊化雕塑标志'}],quiz:{q_en:['What goddess?','Where does she stand?'],a_en:['Nike (Victory)','Daru staircase, Louvre'],q_zh:['什么女神？','她站在哪里？'],a_zh:['胜利女神','卢浮宫达鲁楼梯']}},
-    {id:'l3',name_en:'Venus de Milo',name_zh:'米洛的维纳斯',icon:'ic-statue',date_en:'c.130–100 BC',date_zh:'约公元前130-100年',cat_en:'Marble Sculpture',cat_zh:'大理石雕塑',mat:'Parian marble',dims:'H 2.04 m',origin_en:'Milos, Greece',origin_zh:'希腊 米洛岛',desc_en:'The ideal of classical beauty — Aphrodite, arms lost to time, her contrapposto stance radiating timeless grace.',desc_zh:'古典美的典范——阿佛洛狄忒，双臂遗失于时光，对立式平衡的站姿散发着永恒优雅。',deep_en:'Discovered 1820 by a farmer on Milos. The French acquired her after a scramble with the Ottomans. Originally she held an apple — the prize in the Judgement of Paris.',deep_zh:'1820年被米洛斯岛农夫发现。法国在与奥斯曼帝国的争夺中获得她。她原本握着一颗苹果——帕里斯裁决中的奖品。',facts_en:['Found by a farmer in 1820','France and Ottomans fought over her','She originally held an apple'],facts_zh:['1820年被农夫发现','法国和奥斯曼曾争夺她','她原本握着一颗苹果'],rel:[{id:'l2',name_en:'Winged Victory',name_zh:'胜利女神',r_en:'Hellenistic masterpieces',r_zh:'希腊化杰作'}],quiz:{q_en:['Which goddess?','Where was she found?'],a_en:['Aphrodite (Venus)','Island of Milos'],q_zh:['什么女神？','在哪里发现？'],a_zh:['阿佛洛狄忒（维纳斯）','米洛岛']}},
-    {id:'l4',name_en:'Liberty Leading',name_zh:'自由引导人民',icon:'ic-flag',date_en:'1830',date_zh:'1830年',cat_en:'Oil on Canvas',cat_zh:'布面油画',mat:'Oil on canvas',dims:'260×325 cm',origin_en:'Eugene Delacroix',origin_zh:'欧仁·德拉克洛瓦',desc_en:'Liberty as a bare-breasted woman holding the tricolour — leading a diverse crowd over a barricade. The defining image of the July Revolution.',desc_zh:'自由以裸露上身的女性形象手持三色旗——带领各阶层民众跨越街垒。七月革命的标志性画面。',deep_en:'Delacroix painted himself into the scene (the top-hatted man with a rifle). The boy with pistols inspired Victor Hugo\'s Gavroche in Les Miserables.',deep_zh:'德拉克洛瓦把自己画了进去（戴高帽持步枪的男子）。持双枪的少年启发了雨果《悲惨世界》中的伽弗洛什。',facts_en:['Delacroix painted himself into the scene','Inspired Gavroche in Les Miserables','The tricolour became the national flag afterwards'],facts_zh:['作者把自己画了进去','启发了《悲惨世界》伽弗洛什','此后三色旗成为法国国旗'],rel:[],quiz:{q_en:['Year of revolution?','Artist\'s cameo?'],a_en:['1830','Delacroix (top hat, rifle)'],q_zh:['革命年份？','作者在哪里？'],a_zh:['1830年','德拉克洛瓦（高帽持枪）']}},
-  ],
-};
-
-function eName(ex){return LANG==='en'?ex.name_en:ex.name_zh}
-function eDate(ex){return LANG==='en'?ex.date_en:ex.date_zh}
-function eDesc(ex){return LANG==='en'?ex.desc_en:ex.desc_zh}
-function eDeep(ex){return LANG==='en'?ex.deep_en:ex.deep_zh}
-function eFacts(ex){return LANG==='en'?ex.facts_en:ex.facts_zh}
-function eQuiz(ex){return LANG==='en'?{q:ex.quiz.q_en,a:ex.quiz.a_en}:{q:ex.quiz.q_zh,a:ex.quiz.a_zh}}
-function getAllExhibits(){return EXHIBITS[currentMuseum.id]||[]}
-
-// ══════════════════ GAME STATE ══════════════════
-const LEVELS=[{n_en:'Observer',n_zh:'观察者',min:0,max:99},{n_en:'Explorer',n_zh:'探索者',min:100,max:299},{n_en:'Scholar',n_zh:'学者',min:300,max:599},{n_en:'Curator',n_zh:'策展人',min:600,max:9999}];
-const ACHIEVEMENTS=[{id:'first_q',icon:'ic-ach-chat',n_en:'First Question',n_zh:'初次提问',d_en:'Ask your first question',d_zh:'提出第一个问题',c:()=>player.tq>=1},{id:'deep3',icon:'ic-ach-think',n_en:'Deep Thinker',n_zh:'深度思考者',d_en:'Depth 3 on any artefact',d_zh:'对任意文物达到深度3',c:()=>Object.values(player.ed).some(d=>d>=3)},{id:'coll3',icon:'ic-ach-books',n_en:'Codex Novice',n_zh:'图鉴新人',d_en:'3 Codex entries',d_zh:'收集3条图鉴',c:()=>player.collected.length>=3},{id:'coll7',icon:'ic-ach-museum',n_en:'Museum Scholar',n_zh:'博物馆学者',d_en:'7 Codex entries',d_zh:'收集7条图鉴',c:()=>player.collected.length>=7},{id:'coll_all',icon:'ic-ach-crown',n_en:'Master Curator',n_zh:'大师策展人',d_en:'Complete the Codex',d_zh:'完成全部图鉴',c:()=>{const all=getAllExhibits();return all.length>0&&player.collected.length>=all.length}},{id:'streak5',icon:'ic-ach-fire',n_en:'On Fire',n_zh:'势不可挡',d_en:'5 questions in one session',d_zh:'单次连续5问',c:()=>player.streak>=5},{id:'scholar',icon:'ic-ach-grad',n_en:'Scholar Rank',n_zh:'学者等级',d_en:'Reach Scholar',d_zh:'达到学者',c:()=>player.xp>=300},{id:'quiz3',icon:'ic-ach-brain',n_en:'Quiz Master',n_zh:'问答大师',d_en:'Complete 3 quizzes',d_zh:'完成3次测验',c:()=>player.qz>=3}];
-let player={xp:0,tq:0,streak:0,qz:0,collected:[],ed:{},achievements:[]};
-
-function getLevel(){for(let i=LEVELS.length-1;i>=0;i--)if(player.xp>=LEVELS[i].min)return LEVELS[i];return LEVELS[0]}
-function lvName(l){return LANG==='en'?l.n_en:l.n_zh}
-function xpNext(){const l=getLevel();return l.max===9999?l.min:l.max+1}
-function addXP(amt){const ol=getLevel();player.xp+=amt;player.streak++;const nl=getLevel();updateProfileXP();if(nl.min>ol.min)showLevelUp(lvName(nl));if(player.xp>=300)renderChatModes()}
-function collectEx(id){if(!player.collected.includes(id)){player.collected.push(id);updateCollectCount();showAchievement('ic-book',t('codex_unlock'),'')}}
-function incDepth(id){player.ed[id]=(player.ed[id]||0)+1;if(player.ed[id]>=3)collectEx(id)}
-function checkAch(){for(const a of ACHIEVEMENTS){if(!player.achievements.includes(a.id)&&a.c()){player.achievements.push(a.id);showAchievement(a.icon,t('ach_new'),LANG==='en'?a.n_en:a.n_zh)}}}
-function showAchievement(iconId,title,sub){const el=document.getElementById('ach-popup');el.querySelector('.ap-icon').innerHTML=renderIcon(iconId);el.querySelector('.ap-title').textContent=title;el.querySelector('.ap-sub').textContent=sub;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000)}
-function showLevelUp(title){const el=document.getElementById('level-up');el.querySelector('.level-up-text').textContent=title;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200)}
-
-// ══════════════════ APP STATE ══════════════════
-let currentTab='discover',currentExhibit=null,currentMode='explore',isTyping=false,chatHistory=[],recentExhibits=[],viewedIds=[];
-
-function switchTab(tab){
-  currentTab=tab;
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-item').forEach(b=>b.classList.remove('active'));
-  const pane=document.getElementById('tab-'+tab);
-  pane.classList.add('active');
-  if(tab==='chat')pane.classList.add('chat-pane');else pane.classList.remove('chat-pane');
-  document.querySelector('.tab-item[data-tab="'+tab+'"]').classList.add('active');
-  if(tab==='discover')renderDiscover();
-  if(tab==='collection')renderCollection();
-  if(tab==='profile')renderProfile();
-}
-document.querySelectorAll('.tab-item').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
-
-// ══════════════════ MUSEUM SELECTOR ══════════════════
-function renderMuseumSelector(){
-  const grid=document.getElementById('museumGrid');
-  const sl={open:{en:t('open'),zh:t('open'),cls:'open'},coming_soon:{en:t('soon'),zh:t('soon'),cls:'soon'},planned:{en:t('planned'),zh:t('planned'),cls:'planned'}};
-  grid.innerHTML=MUSEUMS.map(m=>{
-    const s=sl[m.status];const locked=m.status!=='open';
-    return '<div class="m-card '+(locked?'locked':'')+'" data-id="'+m.id+'" onclick="'+(!locked?'selectMuseum(\''+m.id+'\')':'')+'">'
-      +'<div class="mc-region">'+(LANG==='en'?m.region_en:m.region_zh)+'</div><div class="mc-icon">'+renderIcon(m.icon)+'</div><div class="mc-info">'
-      +'<div class="mc-name">'+(LANG==='en'?m.name_en:m.name_zh)+'<span class="mc-badge '+s.cls+'">'+s[LANG]+'</span></div>'
-      +'<div class="mc-loc">'+(LANG==='en'?m.loc_en:m.loc_zh)+'</div>'
-      +'<div class="mc-desc">'+(LANG==='en'?m.desc_en:m.desc_zh)+'</div></div></div>';
-  }).join('');
-}
-function selectMuseum(id){
-  currentMuseum=MUSEUMS.find(m=>m.id===id);
-  document.getElementById('museum-selector').classList.remove('show');
-  document.getElementById('headerMuseum').textContent=LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh;
-  currentExhibit=null;chatHistory=[];
-  renderDiscover();renderChat();renderCollection();renderProfile();renderStory();
-}
-function showMuseumSelector(){toggleModal('settings-modal');document.getElementById('museum-selector').classList.add('show')}
-
-// ══════════════════ DISCOVER TAB ══════════════════
-function renderDiscover(){
-  if(!currentMuseum){document.getElementById('tab-discover').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
-  const ex=getAllExhibits();if(ex.length===0)return;
-  const daily=ex[Math.floor(Math.random()*ex.length)];
-  const depthSum=Object.values(player.ed).reduce((a,b)=>a+b,0);
-  const depthCount=Object.keys(player.ed).length;
-  const avgDepth=depthCount>0?(depthSum/depthCount).toFixed(1):'0.0';
-  let html='<div class="hero-card">'
-    +'<div class="hero-greeting">'+t('disc_daily')+'</div>'
-    +'<div class="hero-artefact">'+eName(daily)+'</div>'
-    +'<div class="hero-meta"><span>'+eDate(daily)+'</span><span>'+daily.mat+'</span></div>'
-    +'<div class="hero-desc">'+eDesc(daily).slice(0,120)+'...</div>'
-    +'<button class="hero-btn" onclick="selectExhibitAndChat(\''+daily.id+'\')">'+t('disc_explore')+' &rarr;</button>'
-    +'</div>'
-    +'<div class="stats-row">'
-    +'<div class="stat-card"><div class="stat-value blue">'+player.xp+'</div><div class="stat-label">'+t('stat_insight')+'</div></div>'
-    +'<div class="stat-card"><div class="stat-value gold">'+player.collected.length+'/'+ex.length+'</div><div class="stat-label">'+t('stat_codex')+'</div></div>'
-    +'<div class="stat-card"><div class="stat-value">'+avgDepth+'</div><div class="stat-label">'+t('stat_depth')+'</div></div>'
-    +'</div>';
-  if(recentExhibits.length>0){
-    html+='<div class="section-header"><span class="section-title">'+t('disc_recent')+'</span></div><div class="h-scroll">';
-    recentExhibits.forEach(e=>{html+='<div class="artefact-card" onclick="selectExhibitAndChat(\''+e.id+'\')"><div class="ac-icon">'+renderIcon(e.icon)+'</div><div class="ac-name">'+eName(e)+'</div><div class="ac-date">'+eDate(e)+'</div>'+(player.collected.includes(e.id)?'<div class="ac-collected">'+renderIcon('ic-book','')+' Codex</div>':'')+'</div>'});
-    html+='</div>';
-  }
-  html+='<div class="section-header"><span class="section-title">'+t('disc_hot')+'</span></div><div class="h-scroll">';
-  ex.forEach(e=>{html+='<div class="artefact-card" onclick="selectExhibitAndChat(\''+e.id+'\')"><div class="ac-icon">'+renderIcon(e.icon)+'</div><div class="ac-name">'+eName(e)+'</div><div class="ac-date">'+eDate(e)+'</div>'+(player.collected.includes(e.id)?'<div class="ac-collected">'+renderIcon('ic-book','')+' Codex</div>':'')+'</div>'});
-  html+='</div>';
-  document.getElementById('tab-discover').innerHTML=html;
-}
-
-function selectExhibitAndChat(id){
-  const ex=getAllExhibits().find(e=>e.id===id);if(!ex)return;
-  if(!viewedIds.includes(id)){viewedIds.push(id);recentExhibits=[ex,...recentExhibits.filter(e=>e.id!==id)].slice(0,5)}
-  currentExhibit=ex;chatHistory=[];
-  switchTab('chat');renderChat();renderChatModes();startExhibitConv();
-}
-
-// ══════════════════ CHAT TAB ══════════════════
-function renderChatModes(){
-  const bar=document.getElementById('chat-mode-bar-inner');
-  if(!bar)return;
-  bar.innerHTML='<button class="mode-pill active" data-mode="explore">'+t('mode_explore')+'</button>'
-    +'<button class="mode-pill" data-mode="narrate">'+t('mode_narrate')+'</button>'
-    +'<button class="mode-pill'+(player.xp<300?' locked':'')+'" data-mode="debate">'+t('mode_debate')+(player.xp<300?' '+renderIcon('ic-lock',''):'')+'</button>'
-    +'<button class="mode-pill" data-mode="children">'+t('mode_children')+'</button>';
-  document.querySelectorAll('#chat-mode-bar-inner .mode-pill:not(.locked)').forEach(b=>b.addEventListener('click',()=>switchMode(b.dataset.mode)));
-  const locked=bar.querySelector('.locked');if(locked)locked.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();addBotMsg(t('debate_locked'))});
-}
-function switchMode(mode){currentMode=mode;renderChatModes();document.querySelectorAll('#chat-mode-bar-inner .mode-pill').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(currentExhibit)addBotMsg(modeIntro())}
-function modeIntro(){
-  const e=currentExhibit;
-  if(LANG==='en'){
-    if(currentMode==='explore')return'<em>Take a moment with '+eName(e)+'. What do you notice first?</em>';
-    if(currentMode==='narrate')return'Let me walk you through '+eName(e)+' — interrupt anytime.';
-    if(currentMode==='debate')return'Let\'s wrestle with '+eName(e)+'. I\'ll challenge your assumptions.';
-    if(currentMode==='children')return'Hi! Meet my friend <strong>'+eName(e)+'</strong> — it\'s over 500 years old!<br>Secret: '+eFacts(e)[0];
-  }else{
-    if(currentMode==='explore')return'<em>慢慢来。你最先注意到了'+eName(e)+'的什么？</em>';
-    if(currentMode==='narrate')return'让我为你讲解'+eName(e)+'——随时可以打断。';
-    if(currentMode==='debate')return'来辩论'+eName(e)+'——我会挑战你的假设。';
-    if(currentMode==='children')return'嘿！来认识<strong>'+eName(e)+'</strong>——已经500多岁了！<br>秘密：'+eFacts(e)[0];
-  }
-  return '';
-}
-
-function renderChat(){
-  const ex=getAllExhibits();if(!currentMuseum||ex.length===0){
-    document.getElementById('tab-chat').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return;
-  }
-  let chips='';ex.forEach(e=>{chips+='<span class="exhibit-chip'+(currentExhibit&&currentExhibit.id===e.id?' active':'')+'" onclick="selectExhibitAndChat(\''+e.id+'\')">'+renderIcon(e.icon)+' '+eName(e)+'</span>'});
-  document.getElementById('tab-chat').innerHTML=
-    '<div class="chat-top"><div class="chat-mode-bar" id="chat-mode-bar-inner"></div>'
-    +'<div class="chat-exhibit-bar">'+chips+'</div></div>'
-    +'<div id="chat-messages"><div class="msg bot"><div class="msg-avatar">'+renderIcon('ic-ai')+'</div><div class="msg-content">'+t('chat_welcome')+'</div></div></div>'
-    +'<div class="quick-actions">'
-    +'<button class="qa-btn" onclick="quickAction(\'deeper\')">'+t('qa_deeper')+'</button>'
-    +'<button class="qa-btn" onclick="quickAction(\'angle\')">'+t('qa_angle')+'</button>'
-    +'<button class="qa-btn" onclick="quickAction(\'quiz\')">'+t('qa_quiz')+'</button>'
-    +'<button class="qa-btn" onclick="quickAction(\'relate\')">'+t('qa_relate')+'</button>'
-    +'</div>'
-    +'<div class="chat-input-wrap"><input id="chat-input" placeholder="'+t('chat_placeholder')+'" onkeydown="if(event.key===\'Enter\')sendMsg()"><button class="chat-send" onclick="sendMsg()">&uarr;</button></div>';
-  renderChatModes();
-}
-
-async function startExhibitConv(){
-  const e=currentExhibit;
-  const card='<div class="ec"><div class="ec-h"><span class="ec-icon">'+renderIcon(e.icon)+'</span><div><div class="ec-name">'+eName(e)+'</div><div class="ec-meta">'+eDate(e)+' · '+e.mat+'</div></div></div><div class="ec-desc">'+eDesc(e)+'</div><button class="ec-guide-btn" onclick="event.stopPropagation();openGuideModal('+"'"+e.id+"'"+')"><svg class="icon-svg" viewBox="0 0 24 24"><use href="#ic-guide"/></svg>'+(LANG==='en'?'Appreciation Guide':'鉴赏指南')+'</button></div>';
-  addBotMsg(card);showTyping();
-  const intro=LANG==='en'?'Introduce '+eName(e)+' to me naturally, as if I\'m standing in front of it.':'向我自然地介绍'+eName(e)+'，就像我正站在它面前一样。';
-  chatHistory=[{role:'user',content:intro}];
-  const resp=await generateResp(intro);
-  hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);
-}
-
-function addUserMsg(text){renderMsg('user',text)}
-function addBotMsg(text){renderMsg('bot',text)}
-function renderMsg(role,text){
-  const div=document.createElement('div');div.className='msg '+role;
-  div.innerHTML='<div class="msg-avatar">'+(role==='user'?renderIcon('ic-user'):renderIcon('ic-ai'))+'</div><div class="msg-content">'+text+'</div>';
-  const msgs=document.getElementById('chat-messages');if(!msgs)return;msgs.appendChild(div);
-  requestAnimationFrame(()=>{msgs.scrollTop=msgs.scrollHeight});
-}
-function showTyping(){
-  isTyping=true;const div=document.createElement('div');div.className='msg bot';div.id='typing-ind';
-  div.innerHTML='<div class="msg-avatar">'+renderIcon('ic-ai')+'</div><div class="msg-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-  const msgs=document.getElementById('chat-messages');if(msgs){msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight}
-}
-function hideTyping(){isTyping=false;const el=document.getElementById('typing-ind');if(el)el.remove()}
-
-async function sendMsg(){
-  const input=document.getElementById('chat-input');if(!input)return;
-  const text=input.value.trim();if(!text||isTyping||!currentExhibit)return;
-  input.value='';addUserMsg(text);chatHistory.push({role:'user',content:text});
-  player.tq++;addXP(5+Math.floor(Math.random()*15));incDepth(currentExhibit.id);checkAch();
-  showTyping();const resp=await generateResp(text);
-  hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);
-}
-
-async function quickAction(act){
-  if(!currentExhibit||isTyping)return;let msg='';
-  if(currentMode==='debate')msg=LANG==='en'?'Challenge my understanding of this.':'挑战我对'+eName(currentExhibit)+'的理解。';
-  else if(act==='deeper')msg=LANG==='en'?'Tell me everything about this artefact.':'把'+eName(currentExhibit)+'的一切都告诉我。';
-  else if(act==='angle')msg=LANG==='en'?'What perspective do most visitors miss?':'大多数参观者会忽略什么？';
-  else if(act==='quiz')msg=LANG==='en'?'Quiz me!':'测试我！';
-  else msg=LANG==='en'?'How does this connect to other treasures?':'它和别的文物有什么联系？';
-  addUserMsg(msg);chatHistory.push({role:'user',content:msg});
-  player.tq++;addXP(8+Math.floor(Math.random()*12));incDepth(currentExhibit.id);
-  showTyping();const resp=await generateResp(msg);
-  hideTyping();chatHistory.push({role:'assistant',content:resp});addBotMsg(resp);checkAch();
-}
-
-const AI_WORKER_URL='/api/chat';
-const DEEPSEEK_API_URL='https://api.deepseek.com/v1/chat/completions';
-const DEEPSEEK_MODEL='deepseek-chat';
-
-async function generateResp(userMsg){
-  const ex=currentExhibit;
-  const exhibitName=ex?(LANG==='en'?ex.name_en:ex.name_zh):'unknown';
-  const exhibitDesc=ex?(LANG==='en'?ex.desc_en:ex.desc_zh):'';
-  const museumName=currentMuseum?(LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh):'';
-
-  const systemPrompt=LANG==='en'
-    ?'You are Muse, a knowledgeable and passionate museum guide at '+museumName+', introducing "'+exhibitName+'".\n\nAbout this exhibit: '+exhibitDesc+'\n\nRules:\n- Reply in English, warm and professional tone like a real museum docent\n- Keep answers concise, within 150 words\n- If asked "tell me more", expand to 300 words\n- Proactively guide observation of details, historical context, craftsmanship\n- Mode: '+(currentMode==='deep'?'Deep explanation mode':currentMode==='quiz'?'Quiz mode, use Socratic questioning':'Casual chat mode')+'\n- Reply in plain text, no Markdown'
-    :'你是 Muse 博悟，一位博学而热情的博物馆导游。你正在'+museumName+'为游客讲解一件名为"'+exhibitName+'"的文物。\n\n这件文物简介：'+exhibitDesc+'\n\n规则：\n- 用中文回答，语气温暖专业，像真正的博物馆讲解员\n- 回答控制在150字以内，简洁有力\n- 如果用户问"深入讲讲"，展开到300字\n- 主动引导观察文物的细节、历史背景、工艺技法\n- 对话模式：'+(currentMode==='deep'?'深度讲解模式':currentMode==='quiz'?'问答互动模式，用提问引导思考':'轻松聊天模式')+'\n- 回复纯文本，不要用 Markdown';
-
-  const messages=[{role:'system',content:systemPrompt},...chatHistory.slice(-10)];
-
-  // 调用 Cloudflare Pages /api/chat 代理
-  try{
-    const resp=await fetch(AI_WORKER_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages,exhibit:currentExhibit,mode:currentMode,lang:LANG,museum:currentMuseum})
-    });
-    if(resp.ok){const d=await resp.json();return d.response.replace(/\n/g,'<br>')}
-    const err=await resp.json().catch(()=>({}));
-    if(err.error&&err.error.includes('DEEPSEEK_API_KEY')){
-      return (LANG==='en'
-        ?'<span style="color:#ff6b6b;">⚠ DeepSeek API key is not configured.</span><br><br>Add <code>DEEPSEEK_API_KEY</code> in your Cloudflare Pages dashboard:<br>Settings → Variables and Secrets → Environment variables<br><br>Your key: <code>sk-fd2d6096c3be41e0a7502e8cc6dea6a1</code>'
-        :'<span style="color:#ff6b6b;">⚠ DeepSeek API Key 未配置。</span><br><br>请在 Cloudflare Pages 后台添加环境变量：<br>Settings → Variables and Secrets → Environment variables<br><br>变量名：<code>DEEPSEEK_API_KEY</code><br>值：<code>sk-fd2d6096c3be41e0a7502e8cc6dea6a1</code>');
-    }
-    console.warn('Proxy returned',resp.status);
-  }catch(e){console.warn('Proxy call failed:',e.message)}
-
-  // 兜底：生成引导性回复
-  return generateFallback();
-}
-function generateFallback(){
-  const tips=LANG==='en'
-    ?['Ask me about the historical background.','Try "What is this made of?" for details.','I can tell you why it matters.','Ask about the cultural significance.']
-    :['你可以问我这件文物的历史背景。','想了解更多细节？试试问"这件文物是用什么做的？"','我可以告诉你它为什么如此重要。','换个角度问，比如"它在当时的社会意味着什么？"'];
-  return tips[Math.floor(Math.random()*tips.length)];
-}
-
-// ══════════════════ COLLECTION ══════════════════
-let collectionFilter='all';
-function setCollectionFilter(f){collectionFilter=f;renderCollection()}
-function renderCollection(){
-  if(!currentMuseum){document.getElementById('tab-collection').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
-  const ex=getAllExhibits();const coll=player.collected.length;
-  let html='<div class="c-progress"><div class="cp-icon">'+renderIcon('ic-codex')+'</div><div class="cp-info"><div class="cp-title">'+t('coll_title')+'</div><div class="cp-count">'+coll+' / '+ex.length+'</div><div class="cp-bar"><div class="cp-bar-inner" style="width:'+(ex.length>0?(coll/ex.length)*100:0)+'%"></div></div></div></div>'
-    +'<div class="collection-filter">'
-    +'<button class="f-pill'+(collectionFilter==='all'?' active':'')+'" onclick="setCollectionFilter(\'all\')">'+t('coll_all')+' ('+ex.length+')</button>'
-    +'<button class="f-pill'+(collectionFilter==='collected'?' active':'')+'" onclick="setCollectionFilter(\'collected\')">'+t('coll_collected')+' ('+coll+')</button>'
-    +'<button class="f-pill'+(collectionFilter==='pending'?' active':'')+'" onclick="setCollectionFilter(\'pending\')">'+t('coll_pending')+' ('+(ex.length-coll)+')</button>'
-    +'</div><div class="collection-grid">';
-  const filtered=collectionFilter==='collected'?ex.filter(e=>player.collected.includes(e.id)):collectionFilter==='pending'?ex.filter(e=>!player.collected.includes(e.id)):ex;
-  filtered.forEach(e=>{
-    const locked=!player.collected.includes(e.id)&&collectionFilter!=='all';
-    html+='<div class="c-item'+(locked?' locked':'')+'" onclick="selectExhibitAndChat(\''+e.id+'\')">'
-      +(player.collected.includes(e.id)?'<div class="c-item-badge">'+renderIcon('ic-book')+'</div>':'')
-      +'<div class="c-item-icon">'+renderIcon(e.icon)+'</div>'
-      +'<div class="c-item-name">'+eName(e)+'</div>'
-      +'<div class="c-item-meta">'+eDate(e)+'</div>'
-      +'</div>';
-  });
-  html+='</div>';document.getElementById('tab-collection').innerHTML=html;
-}
-function updateCollectCount(){if(currentTab==='collection')renderCollection();renderDiscover();renderProfile()}
-
-// ══════════════════ PROFILE ══════════════════
-// ══════════════════ STORY TAB ══════════════════
-function renderStory(){
-  const en=(LANG==='en');
-  const h=document.getElementById('tab-story');
-  h.innerHTML='<div style="text-align:center;padding:60px 20px 40px;">'
-    +'<div style="font-size:42px;font-weight:700;letter-spacing:-0.02em;color:var(--gold);margin-bottom:24px;">The Muse</div>'
-    +'<div style="font-size:18px;color:var(--text-dim);max-width:640px;margin:0 auto;line-height:1.7;">'
-    +(en
-      ?'AI that guides you to <span style="color:var(--gold);">see</span> and <span style="color:var(--gold);">think</span><br>not to read and recite'
-      :'让 AI 引导你去<span style="color:var(--gold);">"看"</span>和<span style="color:var(--gold);">"思考"</span><br>而不是去"读"和"背"')
-    +'</div></div>'
-    +'<div style="max-width:720px;margin:0 auto;padding:0 20px;">'
-    // Card 1
-    +'<div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">'
-    +'<div style="font-size:28px;margin-bottom:8px;">🏛️</div>'
-    +'<div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">'
-    +(en?'Why do museums leave you feeling like you "didn\'t really get it"?':'为什么逛博物馆总觉得自己"没看懂"？')
-    +'</div>'
-    +'<div style="font-size:15px;color:var(--text-dim);line-height:1.8;">'
-    +(en
-      ?'You\'re standing in front of the Rosetta Stone. The label reads: "196 BC, Ptolemy V, granodiorite." You snap a photo. Then what? You don\'t know what to look at.<br><br>Traditional museums fall into one of two extremes: a few barren lines on a placard, or dense academic papers. Either way, it\'s a one-way broadcast. You\'re a passive receiver. Your working memory overloads within seconds, and by the time you step out of the gallery, you\'ve forgotten everything. You didn\'t "get" anything — you just "read" something.'
-      :'你站在罗塞塔石碑前。展签写着"公元前196年，托勒密五世，花岗闪长岩"。你拍了张照。然后呢？你不知道该看什么。<br><br>传统博物馆的信息传达陷入两极：要么是几行干瘪的标签，要么是密密麻麻的学术论文。无论哪种，都是单向灌输——你被动接收，工作记忆瞬间过载，走出展厅就全忘了。你没有"看懂"，你只是"读到了"。')
-    +'</div></div>'
-    // Card 2
-    +'<div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">'
-    +'<div style="font-size:28px;margin-bottom:8px;">🤖</div>'
-    +'<div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">'
-    +(en?'AI isn\'t an encyclopedia — it\'s a guide who asks <em>you</em> questions back':'AI 不是"百科全书"，而是一个会反问你的引路人')
-    +'</div>'
-    +'<div style="font-size:15px;color:var(--text-dim);line-height:1.8;">'
-    +(en
-      ?'The Muse doesn\'t dump information on you. It\'s a Socratic dialogue partner.<br><br>When you photograph an artefact, the AI doesn\'t immediately spit out a Wikipedia entry. It starts by asking: "What\'s the first thing you notice?" — and then builds a ladder of understanding from your unique observation, one step at a time.<br><br><span style="color:var(--gold);font-weight:500;">Every visitor starts from a different place, so the AI takes a different path with each one.</span> If colour draws you in, it\'ll talk pigments and technique. If you\'re curious about a figure\'s expression, it\'ll explore narrative and symbolism. No standard answers, no fixed route. The AI meets you where your attention already is and walks you down a path of understanding that\'s yours alone.<br><br>This is what education scholars call "Dialogic Space" — not pouring knowledge into your head, but helping you construct meaning from your own perceptions and feelings. Knowledge grows from within. It\'s not poured in from outside.'
-      :'The Muse 不做知识的倾倒者。它是一位苏格拉底式的对话伙伴。<br><br>拍下文物，AI 不会立刻吐出一篇维基百科。它会先问你："你注意到的第一件事是什么？"——然后顺着你独特的观察，一步步搭建理解的阶梯。<br><br><span style="color:var(--gold);font-weight:500;">每个游客的起点不同，AI 的引导路径也不同。</span>如果你被色彩打动，它就从颜料和技法切入；如果你好奇人物的表情，它就从叙事和象征聊起。没有标准答案，没有固定路线——AI 从你的第一反应出发，带着你走出只属于你自己的那条理解路径。<br><br>这是教育学家所说的"对话空间"（Dialogic Space）：不是把知识塞进你的脑子，而是从你已有的认知和感受出发，帮你主动建构意义。知识是你自己"长出来"的，不是别人灌进去的。')
-    +'</div></div>'
-    // Card 3
-    +'<div class="story-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;">'
-    +'<div style="font-size:28px;margin-bottom:8px;">⚠️</div>'
-    +'<div style="font-size:20px;font-weight:600;color:var(--gold);margin-bottom:16px;">'
-    +(en?'Why we deliberately put limits on the AI':'为什么我们故意"阉割"了 AI？')
-    +'</div>'
-    +'<div style="font-size:15px;color:var(--text-dim);line-height:1.8;">'
-    +(en
-      ?'Large language models come with a dangerous byproduct: they sound too fluent, too certain. This "epistemic authority" makes visitors stop thinking for themselves — whatever the AI says, goes.<br><br>So in The Muse, we\'ve put prompt engineering reins on the AI: it\'s forbidden from handing down aesthetic verdicts or historical pronouncements. It can say "try looking from this angle," never "this is the greatest masterpiece." The final interpretation always stays with you.<br><br>Because in a museum, the most important thing isn\'t the answer. It\'s the question <em>you</em> come up with yourself.'
-      :'大语言模型有一个危险的副产品：它说话太流畅、太笃定了。这种"认知权威"（Epistemic Authority）会让游客放弃思考——AI 说什么就是什么。<br><br>所以在 The Muse 里，我们用提示词工程给 AI 套上了缰绳：它被禁止直接给出美学结论或历史定论。它只能说"试着从这个角度看"，不能说"这是最伟大的作品"。最终的解释权，永远留给你。<br><br>因为在博物馆里，最重要的不是答案，是你自己产生的那个问题。')
-    +'</div></div>'
-    // Footer
-    +'<div style="text-align:center;padding:40px 0 60px;border-top:1px solid var(--border);margin-top:16px;">'
-    +'<div style="font-size:13px;color:var(--text-dim);max-width:480px;margin:0 auto;line-height:1.8;">'
-    +(en
-      ?'A design experiment exploring what museums can become in the digital age.<br>The Muse began with a simple question: standing between technology and the artefact, there\'s a person — curious, confused, genuinely wanting to understand. What should we give them?<br><br>The answer isn\'t more information.<br>It\'s a real conversation. A journey of thought that belongs to them.'
-      :'一个在数字时代探索博物馆新可能的设计实验。<br>The Muse 源于一个简单的问题：如果技术和文物之间，还站着一个人——一个有好奇心、会困惑、想要真正"看懂"的普通人——我们该给他什么？<br><br>答案不是更多的信息。<br>而是一次真正的对话。一次属于他自己的思考旅程。')
-    +'</div></div>'
-    +'</div>';
-}
-
-function renderProfile(){
-  if(!currentMuseum){document.getElementById('tab-profile').innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">Select a museum first</div>';return}
-  const l=getLevel();const nxt=xpNext();const current=l.min;
-  const pct=l.max===9999?100:Math.min(100,((player.xp-current)/(nxt-current))*100);
-  const ex=getAllExhibits();const coll=player.collected.length;
-  let achHtml='';ACHIEVEMENTS.forEach(a=>{achHtml+='<div class="ach-badge '+(player.achievements.includes(a.id)?'unlocked':'locked')+'">'+renderIcon(a.icon)+'<div class="ach-badge-name">'+(LANG==='en'?a.n_en:a.n_zh)+'</div></div>'});
-  document.getElementById('tab-profile').innerHTML='<div class="profile-card">'
-    +'<div class="pc-avatar">'+renderIcon('ic-nav-museum')+'</div>'
-    +'<div class="pc-info"><div class="pc-name">'+(LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh)+'</div><div class="pc-level">'+lvName(l)+' · '+coll+'/'+ex.length+' Codex</div></div>'
-    +'</div>'
-    +'<div class="profile-card"><div class="pc-info"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:var(--text-dim)">Insight XP</span><span style="font-size:11px;color:var(--text-dim)" id="profileXpText">'+player.xp+' / '+nxt+'</span></div><div class="pc-xp-bar"><div class="pc-xp-inner" id="profileXpInner" style="width:'+pct+'%"></div></div></div></div>'
-    +'<div class="section-header"><span class="section-title">'+t('prof_ach')+'</span></div>'
-    +'<div class="ach-preview">'+achHtml+'</div>'
-    +'<div class="profile-nav" style="margin-top:16px">'
-    +'<div class="p-nav-item" onclick="showMuseumSelector()"><span class="p-nav-icon">'+renderIcon('ic-nav-museum')+'</span><span class="p-nav-label">'+t('prof_museum_switch')+'</span><span class="p-nav-arrow">&rarr;</span></div>'
-    +'<div class="p-nav-item" onclick="openAchModal()"><span class="p-nav-icon">'+renderIcon('ic-nav-trophy')+'</span><span class="p-nav-label">'+t('prof_ach')+'</span><span class="p-nav-arrow">&rarr;</span></div>'
-    +'<div class="p-nav-item" onclick="toggleModal(\'settings-modal\')"><span class="p-nav-icon">'+renderIcon('ic-nav-settings')+'</span><span class="p-nav-label">'+t('prof_settings')+'</span><span class="p-nav-arrow">&rarr;</span></div>'
-    +'<div class="p-nav-item" onclick="toggleModal(\'about-modal\')"><span class="p-nav-icon">'+renderIcon('ic-nav-info')+'</span><span class="p-nav-label">'+t('prof_about')+'</span><span class="p-nav-arrow">&rarr;</span></div>'
-    +'</div>';
-  if(!document.getElementById('about-modal')){
-    const div=document.createElement('div');div.className='modal-overlay';div.id='about-modal';
-    div.innerHTML='<div class="modal-inner"><div class="modal-title">About Muse</div><div style="font-size:13px;line-height:1.7;color:var(--text-mid)">'+t('prof_about_text')+'</div><button class="modal-close" onclick="toggleModal(\'about-modal\')">Close</button></div>';
-    document.body.appendChild(div);
-  }
-}
-function updateProfileXP(){
-  if(currentTab!=='profile')return;
-  const l=getLevel();const nxt=xpNext();const current=l.min;
-  const pct=l.max===9999?100:Math.min(100,((player.xp-current)/(nxt-current))*100);
-  const el=document.getElementById('profileXpInner');if(el)el.style.width=pct+'%';
-  const txt=document.getElementById('profileXpText');if(txt)txt.textContent=player.xp+' / '+nxt;
-}
-function openAchModal(){
-  const modal=document.getElementById('ach-modal');const list=document.getElementById('ach-list');
-  modal.querySelector('.modal-title').textContent=t('prof_ach');
-  list.innerHTML=ACHIEVEMENTS.map(a=>{const u=player.achievements.includes(a.id);return '<div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);opacity:'+(u?1:0.35)+'"><span style="font-size:22px;color:'+(u?'var(--gold)':'var(--text-dim)')+'">'+renderIcon(a.icon)+'</span><div><div style="font-size:13px;font-weight:600">'+(LANG==='en'?a.n_en:a.n_zh)+(u?' &check;':'')+'</div><div style="font-size:11px;color:var(--text-dim)">'+(LANG==='en'?a.d_en:a.d_zh)+'</div></div></div>'}).join('');
-  toggleModal('ach-modal');
-}
-function toggleModal(id){const el=document.getElementById(id);if(el)el.classList.toggle('open')}
-function resetProgress(){player={xp:0,tq:0,streak:0,qz:0,collected:[],ed:{},achievements:[]};recentExhibits=[];toggleModal('settings-modal');renderDiscover();renderCollection();renderProfile();renderChat()}
-
-// ══════════════════ INIT ══════════════════
-function init(){
-  renderMuseumSelector();
-  setTimeout(()=>{document.getElementById('loading').classList.add('hidden');setTimeout(()=>document.getElementById('museum-selector').classList.add('show'),400)},2200);
-}
-init();
-
-// ══════════════════ GUIDE MODAL ══════════════════
-function openGuideModal(id){
-  const ex=getAllExhibits().find(e=>e.id===id);if(!ex)return;
-  const modal=document.getElementById('guide-modal');
-  document.getElementById('guide-icon').innerHTML=renderIcon(ex.icon);
-  document.getElementById('guide-name').textContent=eName(ex);
-  
-  // Render official tab
-  const off=document.getElementById('guide-panel-official');
-  const officialText=LANG==='en'?ex.official_en:ex.official_zh;
-  if(officialText){
-    off.innerHTML='<div class="guide-official">'+officialText+'</div>';
-  } else {
-    off.innerHTML='<div class="guide-official"><p>'+(LANG==='en'?'Coming soon — detailed museum commentary will be added in a future update.':'即将上线——博物馆官方解说将在后续更新中添加。')+'</p></div>';
-  }
-  
-  // Render appreciation guide tab
-  const app=document.getElementById('guide-panel-appreciate');
-  const guideText=LANG==='en'?ex.guide_en:ex.guide_zh;
-  if(guideText){
-    const guideData=JSON.parse(guideText);
-    let stepsHtml='';
-    guideData.forEach(s=>{
-      stepsHtml+='<div class="guide-step"><div class="guide-step-num">'+s.step+'</div><div class="guide-step-title">'+s.title+'</div><div class="guide-step-desc">'+s.desc+'</div></div>';
-    });
-    app.innerHTML=stepsHtml;
-  } else {
-    app.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-dim)">'+(LANG==='en'?'Coming soon':'即将上线')+'</div>';
-  }
-  
-  // Reset tabs
-  document.querySelectorAll('.guide-tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.guide-tab-btn[data-guide-tab="official"]').forEach(b=>b.classList.add('active'));
-  document.querySelectorAll('.guide-tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('guide-panel-official').classList.add('active');
-  
-  modal.classList.add('open');
-  // Close on overlay click
-  modal.onclick=function(e){if(e.target===modal)closeGuideModal()};
-}
-function closeGuideModal(){
-  document.getElementById('guide-modal').classList.remove('open');
-}
-function switchGuideTab(tab){
-  document.querySelectorAll('.guide-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.guideTab===tab));
-  document.querySelectorAll('.guide-tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('guide-panel-'+tab).classList.add('active');
-}
-</script>
+<script src="app.js"></script>
 </body>
 </html>
