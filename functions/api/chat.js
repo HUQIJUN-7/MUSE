@@ -111,9 +111,11 @@ RULES:
 - If the visitor asks a direct factual question, answer it concisely first, then pivot to observation
 - If asked something genuinely unknown about THIS artefact, admit uncertainty and pivot to an observation question`;
 
+    // Strip frontend system prompt; backend builds its own. Keep only user/assistant history.
+    const historyMessages = messages.filter(m => m.role !== 'system').slice(-4);
     const fullMessages = [
       { role: 'system', content: systemPrompt },
-      ...messages.slice(-6)
+      ...historyMessages
     ];
 
     const tempMap = { explore: 0.7, narrate: 0.85, debate: 0.95, children: 0.8 };
@@ -140,7 +142,7 @@ RULES:
         model: 'deepseek-chat',
         messages: fullMessages,
         temperature: temperature,
-        max_tokens: 600,
+        max_tokens: 400,
       }),
     });
 
