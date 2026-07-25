@@ -234,6 +234,19 @@ body{
 
 @media(max-width:400px){.collection-grid{grid-template-columns:repeat(2,1fr)}.artefact-card{min-width:160px;max-width:160px}}
 
+/* ── Language Select Page ── */
+#lang-select-page{position:fixed;inset:0;z-index:950;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s;opacity:1;visibility:visible}
+#lang-select-page.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.lang-title{font-size:28px;font-weight:700;letter-spacing:6px;color:var(--gold-bright);margin-bottom:8px;text-align:center}
+.lang-subtitle{font-size:13px;color:var(--text-dim);letter-spacing:3px;margin-bottom:48px;text-align:center}
+.lang-buttons{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.lang-btn{padding:16px 40px;border-radius:28px;font-size:16px;font-weight:600;border:1px solid rgba(255,255,255,0.1);background:var(--surface2);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--text);cursor:pointer;transition:var(--transition);letter-spacing:1px;font-family:var(--font);min-width:140px}
+.lang-btn:hover{border-color:var(--gold);background:var(--gold-glass);color:var(--gold-bright);transform:translateY(-2px)}
+
+/* ── Toast ── */
+#toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;padding:16px 32px;border-radius:16px;background:rgba(20,20,30,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--gold);color:var(--gold-bright);font-size:14px;font-weight:500;letter-spacing:0.5px;opacity:0;visibility:hidden;transition:opacity 0.4s,visibility 0.4s;pointer-events:none;text-align:center;font-family:var(--font)}
+#toast.show{opacity:1;visibility:visible}
+
 /* ── Guide Modal ── */
 .guide-overlay{position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .35s cubic-bezier(0.25,0.1,0.25,1),visibility .35s}
 .guide-overlay.open{opacity:1;visibility:visible}
@@ -337,6 +350,15 @@ body{
   <div class="l-title">MUSE</div><div class="l-sub">博 悟</div>
 </div>
 
+<div id="lang-select-page">
+  <div class="lang-title">选择语言 / Select Language</div>
+  <div class="lang-subtitle">请选择您的语言 · Choose your preferred language</div>
+  <div class="lang-buttons">
+    <button class="lang-btn" onclick="selectLang('zh')">中文</button>
+    <button class="lang-btn" onclick="selectLang('en')">English</button>
+  </div>
+</div>
+<div id="toast"></div>
 <div id="museum-selector" class="">
   <div class="museum-grid" id="museumGrid"><div class="m-card " data-id="british" onclick="selectMuseum('british')"><div class="mc-region">欧洲</div><div class="mc-icon"><svg class="icon-svg " viewBox="0 0 24 24"><use href="#ic-british"></use></svg></div><div class="mc-info"><div class="mc-name">大英博物馆<span class="mc-badge open">开放中</span></div><div class="mc-loc">英国·伦敦</div><div class="mc-desc">世界上第一座国家公共博物馆。800万件藏品跨越两百万年历史。</div></div></div><div class="m-card " data-id="louvre" onclick="selectMuseum('louvre')"><div class="mc-region">欧洲</div><div class="mc-icon"><svg class="icon-svg " viewBox="0 0 24 24"><use href="#ic-louvre"></use></svg></div><div class="mc-info"><div class="mc-name">卢浮宫<span class="mc-badge open">开放中</span></div><div class="mc-loc">法国·巴黎</div><div class="mc-desc">全球访问量最高的博物馆——从蒙娜丽莎到胜利女神。</div></div></div><div class="m-card locked" data-id="met" onclick=""><div class="mc-region">北美</div><div class="mc-icon"><svg class="icon-svg " viewBox="0 0 24 24"><use href="#ic-met"></use></svg></div><div class="mc-info"><div class="mc-name">大都会<span class="mc-badge soon">即将开放</span></div><div class="mc-loc">美国·纽约</div><div class="mc-desc">跨越五千年、两百万件作品。</div></div></div><div class="m-card locked" data-id="palace" onclick=""><div class="mc-region">亚洲</div><div class="mc-icon"><svg class="icon-svg " viewBox="0 0 24 24"><use href="#ic-palace"></use></svg></div><div class="mc-info"><div class="mc-name">故宫博物院<span class="mc-badge planned">规划中</span></div><div class="mc-loc">中国·北京</div><div class="mc-desc">紫禁城——180万件皇家珍宝。</div></div></div><div class="m-card locked" data-id="egyptian" onclick=""><div class="mc-region">非洲</div><div class="mc-icon"><svg class="icon-svg " viewBox="0 0 24 24"><use href="#ic-egyptian"></use></svg></div><div class="mc-info"><div class="mc-name">埃及博物馆<span class="mc-badge planned">规划中</span></div><div class="mc-loc">埃及·开罗</div><div class="mc-desc">图坦卡蒙黄金面具领衔12万件文物。</div></div></div><div class="m-card locked" data-id="uffizi" onclick=""><div class="mc-region">欧洲</div><div class="mc-icon"><svg class="icon-svg " viewBox="0 0 24 24"><use href="#ic-uffizi"></use></svg></div><div class="mc-info"><div class="mc-name">乌菲兹美术馆<span class="mc-badge planned">规划中</span></div><div class="mc-loc">意大利·佛罗伦萨</div><div class="mc-desc">文艺复兴的摇篮——波提切利、达芬奇、拉斐尔。</div></div></div></div>
 </div>
@@ -454,6 +476,16 @@ function switchLang(l){
   LANG=l;document.querySelectorAll('.h-btn').forEach(b=>b.classList.toggle('active',(b.textContent.trim()===(l==='en'?'EN':'中'))));
   document.querySelectorAll('.tab-item').forEach(b=>{const tb=b.dataset.tab;if(tb)b.querySelector('.tab-label').textContent=t('tab_'+tb)});
   renderMuseumSelector();renderDiscover();renderChat();renderCollection();renderProfile();renderStory();
+}
+function showToast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+function selectLang(l){
+  LANG=l;document.querySelectorAll('.h-btn').forEach(b=>b.classList.toggle('active',(b.textContent.trim()===(l==='en'?'EN':'中'))));
+  document.getElementById('lang-select-page').classList.add('hidden');
+  renderMuseumSelector();
+  setTimeout(()=>document.getElementById('museum-selector').classList.add('show'),400);
 }
 
 // ══════════════════ MUSEUM DATA ══════════════════
@@ -654,7 +686,7 @@ function renderMuseumSelector(){
   const sl={open:{en:t('open'),zh:t('open'),cls:'open'},coming_soon:{en:t('soon'),zh:t('soon'),cls:'soon'},planned:{en:t('planned'),zh:t('planned'),cls:'planned'}};
   grid.innerHTML=MUSEUMS.map(m=>{
     const s=sl[m.status];const locked=m.status!=='open';
-    return '<div class="m-card '+(locked?'locked':'')+'" data-id="'+m.id+'" onclick="'+(!locked?'selectMuseum(\''+m.id+'\')':'')+'">'
+    return '<div class="m-card '+(locked?'locked':'')+'" data-id="'+m.id+'" onclick="'+(!locked?'selectMuseum(\''+m.id+'\')':('showToast(\''+(LANG==='en'?'Coming soon':'即将开放，敬请期待')+'\')'))+'">'
       +'<div class="mc-region">'+(LANG==='en'?m.region_en:m.region_zh)+'</div><div class="mc-icon">'+renderIcon(m.icon)+'</div><div class="mc-info">'
       +'<div class="mc-name">'+(LANG==='en'?m.name_en:m.name_zh)+'<span class="mc-badge '+s.cls+'">'+s[LANG]+'</span></div>'
       +'<div class="mc-loc">'+(LANG==='en'?m.loc_en:m.loc_zh)+'</div>'
@@ -971,7 +1003,7 @@ function resetProgress(){player={xp:0,tq:0,streak:0,qz:0,collected:[],ed:{},achi
 // ══════════════════ INIT ══════════════════
 function init(){
   renderMuseumSelector();
-  setTimeout(()=>{document.getElementById('loading').classList.add('hidden');setTimeout(()=>document.getElementById('museum-selector').classList.add('show'),400)},2200);
+  setTimeout(()=>{document.getElementById('loading').classList.add('hidden')},2200);
   initVoice();
 }
 init();
