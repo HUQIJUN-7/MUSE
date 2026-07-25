@@ -113,7 +113,7 @@ RULES:
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-v4-pro',
         messages: fullMessages,
         temperature: temperature,
         max_tokens: 300,
