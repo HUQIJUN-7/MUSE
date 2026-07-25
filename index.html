@@ -67,15 +67,25 @@
   <div class="l-sub">The Muse</div>
 </div>
 
+<!-- Language Select Page -->
+<div id="lang-select-page">
+  <div class="lang-title">选择语言 / Select Language</div>
+  <div class="lang-sub">Choose your language to begin</div>
+  <div class="lang-buttons">
+    <button class="lang-btn" onclick="selectLang('zh')">中文</button>
+    <button class="lang-btn" onclick="selectLang('en')">English</button>
+  </div>
+</div>
+
 <!-- Museum Selector -->
 <div id="museum-selector">
   <div id="lectorInner"></div>
 </div>
 
 <!-- Header -->
-<div id="header">
-  <div class="h-left"><span class="h-logo">MUSE</span><span id="headerMuseum">Muse</span></div>
-  <div class="h-right">
+<div id="header" class="app-header">
+  <div class="header-brand"><span class="header-logo">MUSE</span><span class="header-museum" id="headerMuseum">Muse</span></div>
+  <div class="header-actions">
     <button class="h-btn" onclick="switchLang('en')">EN</button>
     <button class="h-btn" onclick="switchLang('zh')">中</button>
   </div>
@@ -116,11 +126,11 @@
 
 <!-- Guide Modal -->
 <div id="guide-modal" class="guide-overlay">
-  <div class="guide-card">
+  <div class="guide-container">
     <div class="guide-header">
-      <div class="guide-header-left">
-        <div class="guide-icon" id="guide-icon"></div>
-        <div class="guide-title" id="guide-name"></div>
+      <div class="guide-h-left">
+        <div class="guide-h-icon" id="guide-icon"></div>
+        <div class="guide-h-name" id="guide-name"></div>
       </div>
       <button class="guide-close" onclick="closeGuideModal()">&times;</button>
     </div>
@@ -128,7 +138,7 @@
       <button class="guide-tab-btn" data-guide-tab="official" onclick="switchGuideTab('official')">Official</button>
       <button class="guide-tab-btn" data-guide-tab="appreciate" onclick="switchGuideTab('appreciate')">Guide</button>
     </div>
-    <div class="guide-panels">
+    <div class="guide-body">
       <div id="guide-panel-official" class="guide-tab-panel active"></div>
       <div id="guide-panel-appreciate" class="guide-tab-panel"></div>
     </div>

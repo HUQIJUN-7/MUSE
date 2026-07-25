@@ -218,6 +218,25 @@ body{
 
 @media(max-width:400px){.collection-grid{grid-template-columns:repeat(2,1fr)}.artefact-card{min-width:160px;max-width:160px}}
 
+/* ── Language Select Page ── */
+#lang-select-page{position:fixed;inset:0;z-index:950;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:1;visibility:visible;transition:opacity 0.6s,visibility 0.6s}
+#lang-select-page.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.lang-title{font-size:28px;font-weight:700;color:var(--gold-bright);letter-spacing:2px;margin-bottom:8px;text-align:center}
+.lang-sub{font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-bottom:40px;text-align:center}
+.lang-buttons{display:flex;gap:16px}
+.lang-btn{padding:14px 40px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.1);background:var(--surface2);color:var(--text);cursor:pointer;font-size:16px;font-weight:600;font-family:var(--font);transition:var(--transition);letter-spacing:1px}
+.lang-btn:hover{border-color:var(--gold);background:var(--gold-glass);color:var(--gold-bright);transform:translateY(-1px)}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);z-index:300;padding:10px 20px;background:rgba(30,30,40,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:var(--text);font-size:13px;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+
+/* ── Museum Card Status ── */
+.mc-status{font-size:9px;color:var(--text-dim);letter-spacing:0.5px;margin-bottom:4px}
+
+/* ── Header (ID-based) ── */
+#header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:rgba(10,10,15,0.85);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid rgba(255,255,255,0.06);min-height:54px}
+
 /* ── Chat Image Upload ── */
 .chat-img-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.08);background:var(--surface);color:var(--text-dim);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:16px}
 .chat-img-btn:hover{border-color:var(--gold);color:var(--gold)}

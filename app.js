@@ -41,6 +41,8 @@ const T={
 };
 function t(k){return (T[LANG]||T.en)[k]||k}
 function switchLang(l){LANG=l;document.querySelectorAll('.h-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()===(l==='en'?'EN':'中')));renderAll()}
+function selectLang(l){LANG=l;document.getElementById('lang-select-page').classList.add('hidden');setTimeout(()=>{renderMuseumSelector();showMuseumSelector()},300)}
+function lockedToast(){showToast(LANG==='en'?'Coming soon':'即将开放，敬请期待')}
 function renderAll(){
   renderMuseumSelector();renderDiscover();renderChat();renderCollection();renderProfile();renderStory();
 }
@@ -194,7 +196,7 @@ function renderMuseumSelector(){
   let html='<div class="selector-title">'+t('select_title')+'</div><div class="selector-sub">'+t('select_sub')+'</div><div class="museum-grid" id="museumGrid">';
   MUSEUMS.forEach(m=>{
     const locked=m.status!=='open';
-    html+='<div class="m-card'+(locked?' locked':'')+(m===currentMuseum?' selected':'')+'" onclick="selectMuseum(\''+m.id+'\')">'
+    html+='<div class="m-card'+(locked?' locked':'')+(m===currentMuseum?' selected':'')+'" onclick="'+(locked?'lockedToast()':'selectMuseum(\''+m.id+'\')')+'">'
       +'<div class="mc-status">'+(m.status==='coming_soon'?'Coming Soon':m.status==='planned'?'Planned':'')+'</div>'
       +'<div class="mc-region">'+(LANG==='en'?m.region_en:m.region_zh)+'</div><div class="mc-icon">'+renderIcon(m.icon)+'</div><div class="mc-info">'
       +'<div class="mc-name">'+(LANG==='en'?m.name_en:m.name_zh)+'</div><div class="mc-loc">'+(LANG==='en'?m.loc_en:m.loc_zh)+'</div>'
@@ -291,11 +293,11 @@ function renderDiscover(){
   const ex=getAllExhibits();let html='';
   // Recent exhibits section
   if(recentExhibits.length>0){
-    html+='<div class="section-header"><span class="section-title">'+(LANG==='en'?'Recent':'最近浏览')+'</span></div><div class="artefact-row" id="recentRow">';
+    html+='<div class="section-header"><span class="section-title">'+(LANG==='en'?'Recent':'最近浏览')+'</span></div><div class="h-scroll" id="recentRow">';
     recentExhibits.forEach(e=>{html+='<div class="artefact-card" onclick="selectExhibitAndChat(\''+e.id+'\')"><div class="ac-icon">'+renderIcon(e.icon)+'</div><div class="ac-name">'+eName(e)+'</div><div class="ac-date">'+eDate(e)+'</div>'+(player.collected.includes(e.id)?'<div class="ac-collected">'+renderIcon('ic-book','')+' Codex</div>':'')+'</div>'});
     html+='</div>';
   }
-  html+='<div class="section-header"><span class="section-title">'+(LANG==='en'?'All Exhibits':'全部文物')+'</span></div><div class="artefact-row">';
+  html+='<div class="section-header"><span class="section-title">'+(LANG==='en'?'All Exhibits':'全部文物')+'</span></div><div class="h-scroll">';
   ex.forEach(e=>{html+='<div class="artefact-card" onclick="selectExhibitAndChat(\''+e.id+'\')"><div class="ac-icon">'+renderIcon(e.icon)+'</div><div class="ac-name">'+eName(e)+'</div><div class="ac-date">'+eDate(e)+'</div>'+(player.collected.includes(e.id)?'<div class="ac-collected">'+renderIcon('ic-book','')+' Codex</div>':'')+'</div>'});
   html+='</div>';document.getElementById('tab-discover').innerHTML=html;
 }
@@ -402,13 +404,12 @@ function showToast(msg){
   if(!toast){
     toast=document.createElement('div');
     toast.id='toast';
-    toast.style.cssText='position:fixed;bottom:120px;left:50%;transform:translateX(-50%);z-index:300;padding:10px 20px;background:rgba(30,30,40,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:var(--text);font-size:13px;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:90%;text-align:center';
     document.body.appendChild(toast);
   }
   toast.textContent=msg;
-  toast.style.opacity='1';
+  toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{toast.style.opacity='0'},3000);
+  toastTimer=setTimeout(()=>{toast.classList.remove('show')},2000);
 }
 
 async function startExhibitConv(){
@@ -493,7 +494,7 @@ async function quickAction(act){
 
 const AI_WORKER_URL='/api/chat';
 const DEEPSEEK_API_URL='https://api.deepseek.com/v1/chat/completions';
-const DEEPSEEK_MODEL='deepseek-chat';
+const DEEPSEEK_MODEL='deepseek-v4-pro';
 
 async function generateResp(userMsg,imageData){
   const ex=currentExhibit;
@@ -664,19 +665,10 @@ function resetProgress(){player={xp:0,tq:0,streak:0,qz:0,collected:[],ed:{},achi
 // ══════════════════ INIT ══════════════════
 function init(){
   renderMuseumSelector();
-  if(currentMuseum){
-    // Museum already selected (from localStorage) — skip selector
-    document.getElementById('headerMuseum').textContent=LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh;
-    setTimeout(()=>{
-      document.getElementById('loading').classList.add('hidden');
-      renderAll();
-    },1800);
-  } else {
-    setTimeout(()=>{
-      document.getElementById('loading').classList.add('hidden');
-      setTimeout(()=>document.getElementById('museum-selector').classList.add('show'),400);
-    },2200);
-  }
+  setTimeout(()=>{
+    document.getElementById('loading').classList.add('hidden');
+    setTimeout(()=>document.getElementById('lang-select-page').classList.add('show'),400);
+  },2200);
 }
 
 // ══════════════════ GUIDE MODAL ══════════════════
