@@ -12,30 +12,32 @@ export async function onRequest(context) {
   }
 
   if (request.method !== 'POST') {
-    return new Response('POST only', {
+    return new Response(JSON.stringify({ error: 'POST only' }), {
       status: 405,
-      headers: { 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
 
   try {
     const body = await request.json();
-    const messages = body.messages || [];
-    const exhibit = body.exhibit || null;
+    const history = body.history || [];
+    const exhibitData = body.exhibitData || {};
+    const museumName = body.museumName || 'the museum';
     const mode = body.mode || 'explore';
     const lang = body.lang || 'en';
 
-    let exhibitInfo = 'No specific artefact selected.';
-    if (exhibit) {
-      const n = lang === 'zh' ? exhibit.name_zh : exhibit.name_en;
-      const date = lang === 'zh' ? exhibit.date_zh : exhibit.date_en;
-      const desc = lang === 'zh' ? exhibit.desc_zh : exhibit.desc_en;
-      const deep = lang === 'zh' ? exhibit.deep_zh : exhibit.deep_en;
-      const facts = lang === 'zh' ? (exhibit.facts_zh || []).join('；') : (exhibit.facts_en || []).join('; ');
-      const origin = lang === 'zh' ? exhibit.origin_zh : exhibit.origin_en;
-      const mat = exhibit.mat || '';
-      exhibitInfo = `Name: ${n}\nDate: ${date}\nMaterial: ${mat}\nOrigin: ${origin}\nDescription: ${desc}\nDeep Knowledge: ${deep}\nFun Facts: ${facts}`;
-    }
+    // Build exhibit info string
+    const n = lang === 'zh' ? (exhibitData.name_zh || '未知文物') : (exhibitData.name_en || 'Unknown');
+    const date = lang === 'zh' ? (exhibitData.date_zh || '') : (exhibitData.date_en || '');
+    const desc = lang === 'zh' ? (exhibitData.desc_zh || '') : (exhibitData.desc_en || '');
+    const deep = lang === 'zh' ? (exhibitData.deep_zh || '') : (exhibitData.deep_en || '');
+    const facts = lang === 'zh'
+      ? (exhibitData.facts_zh || []).join('；')
+      : (exhibitData.facts_en || []).join('; ');
+    const origin = lang === 'zh' ? (exhibitData.origin_zh || '') : (exhibitData.origin_en || '');
+    const mat = exhibitData.mat || '';
+
+    const exhibitInfo = `Name: ${n}\nDate: ${date}\nMaterial: ${mat}\nOrigin: ${origin}\nDescription: ${desc}\nDeep Knowledge: ${deep}\nFun Facts: ${facts}`;
 
     const langInst = lang === 'zh'
       ? '请用中文回复，地道自然的汉语。'
@@ -56,7 +58,10 @@ export async function onRequest(context) {
         : 'You are in Children mode (age 8-12). Use simple words. Be playful and wonder-filled, like talking to a child.'
     };
 
-    const corePrompt = `You are "The Muse", a knowledgeable museum guide. Your primary mission is to help visitors UNDERSTAND the artefact — its history, significance, craftsmanship, and cultural context. Think like a great museum docent: inform first, inspire second.
+    const corePrompt = `You are "The Muse", a knowledgeable museum guide at ${museumName}. Your primary mission is to help visitors UNDERSTAND the artefact — its history, significance, craftsmanship, and cultural context. Think like a great museum docent: inform first, inspire second.
+
+[KNOWLEDGE ABOUT THIS ARTEFACT]
+${exhibitInfo}
 
 [CORE RULES]
 1. Your FIRST priority is always to educate. Give clear, substantive answers about the artefact.
@@ -75,21 +80,16 @@ ${langInst}
 
 ${modeAdjust[mode] || modeAdjust.explore}
 
-KNOWLEDGE ABOUT THIS ARTEFACT:
-${exhibitInfo}
-
-RULES:
+FINAL RULES:
 - You are The Muse, a museum guide whose job is to help visitors understand artefacts
 - Never say "As an AI" or give disclaimers
 - Prioritize information: answer questions with real substance, not abstract philosophy
 - Observation prompts must be about the artefact itself, not hypothetical thought experiments
 - Keep responses under 5 sentences`;
 
-    // Strip frontend system prompt; backend builds its own. Keep only user/assistant history.
-    const historyMessages = messages.filter(m => m.role !== 'system').slice(-4);
     const fullMessages = [
       { role: 'system', content: systemPrompt },
-      ...historyMessages
+      ...history.slice(-4)
     ];
 
     const tempMap = { explore: 0.7, narrate: 0.85, debate: 0.95, children: 0.8 };
@@ -99,10 +99,7 @@ RULES:
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'DEEPSEEK_API_KEY not configured' }), {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
@@ -125,10 +122,7 @@ RULES:
     if (!aiResponse.ok) {
       return new Response(JSON.stringify({ error: aiResult.error?.message || 'AI API error' }), {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 

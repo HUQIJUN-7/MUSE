@@ -856,43 +856,39 @@ const DEEPSEEK_API_URL='https://api.deepseek.com/v1/chat/completions';
 const DEEPSEEK_MODEL='deepseek-v4-pro';
 
 async function generateResp(userMsg){
-  const ex=currentExhibit;
-  const exhibitName=ex?(LANG==='en'?ex.name_en:ex.name_zh):'unknown';
-  const exhibitDesc=ex?(LANG==='en'?ex.desc_en:ex.desc_zh):'';
-  const museumName=currentMuseum?(LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh):'';
-
-  const systemPrompt=LANG==='en'
-    ?'You are Muse, a knowledgeable and passionate museum guide at '+museumName+', introducing "'+exhibitName+'".\n\nAbout this exhibit: '+exhibitDesc+'\n\nRules:\n- Reply in English, warm and professional tone like a real museum docent\n- Keep answers concise, within 150 words\n- If asked "tell me more", expand to 300 words\n- Proactively guide observation of details, historical context, craftsmanship\n- Mode: '+(currentMode==='deep'?'Deep explanation mode':currentMode==='quiz'?'Quiz mode, use Socratic questioning':'Casual chat mode')+'\n- Reply in plain text, no Markdown'
-    :'你是 Muse 博悟，一位博学而热情的博物馆导游。你正在'+museumName+'为游客讲解一件名为"'+exhibitName+'"的文物。\n\n这件文物简介：'+exhibitDesc+'\n\n规则：\n- 用中文回答，语气温暖专业，像真正的博物馆讲解员\n- 回答控制在150字以内，简洁有力\n- 如果用户问"深入讲讲"，展开到300字\n- 主动引导观察文物的细节、历史背景、工艺技法\n- 对话模式：'+(currentMode==='deep'?'深度讲解模式':currentMode==='quiz'?'问答互动模式，用提问引导思考':'轻松聊天模式')+'\n- 回复纯文本，不要用 Markdown';
-
-  const messages=[{role:'system',content:systemPrompt},...chatHistory.slice(-10)];
-
-  // 调用 Cloudflare Pages /api/chat 代理（带重试）
-  const body=JSON.stringify({messages,exhibit:currentExhibit,mode:currentMode,lang:LANG,museum:currentMuseum});
+  const ex=currentExhibit;if(!ex)return LANG==='en'?'No artefact selected.':'未选择文物。';
+  // 后端自行构建系统 Prompt，前端仅传聊天历史+展品关键字段
+  const body=JSON.stringify({
+    history:chatHistory.slice(-6),
+    exhibitData:{
+      name_zh:ex.name_zh,name_en:ex.name_en,
+      date_zh:ex.date_zh,date_en:ex.date_en,
+      desc_zh:ex.desc_zh,desc_en:ex.desc_en,
+      deep_zh:ex.deep_zh,deep_en:ex.deep_en,
+      facts_zh:ex.facts_zh||[],facts_en:ex.facts_en||[],
+      origin_zh:ex.origin_zh,origin_en:ex.origin_en,
+      mat:ex.mat||''
+    },
+    museumId:currentMuseum?currentMuseum.id:'',
+    museumName:currentMuseum?(LANG==='en'?currentMuseum.name_en:currentMuseum.name_zh):'',
+    mode:currentMode,
+    lang:LANG
+  });
   for(let attempt=0;attempt<2;attempt++){
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),20000); // 20s 超时，适配微信WebView
     try{
-      const resp=await fetch(AI_WORKER_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body
-      });
+      const resp=await fetch(AI_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body,signal:ctrl.signal});
+      clearTimeout(timer);
       if(resp.ok){const d=await resp.json();return d.response.replace(/\n/g,'<br>')}
-      // 非 200：尝试读取后端错误信息
       let errMsg='';
       try{const err=await resp.json();errMsg=err.error||''}catch(_){}
       console.warn('Proxy returned',resp.status,errMsg);
-      // 仅对 5xx 重试，4xx 直接放弃
-      if(resp.status<500||attempt===1)return LANG==='en'
-        ?'Sorry, the AI is temporarily unavailable. Please try again in a moment.'
-        :'抱歉，AI 暂时不可用（'+resp.status+'），请稍后重试。';
-    }catch(e){console.warn('Proxy call failed:',e.message)}
-    // 重试前等待 1.5 秒
+      if(resp.status<500||attempt===1)return LANG==='en'?'Sorry, the AI is temporarily unavailable. Please try again in a moment.':'抱歉，AI 暂时不可用（'+resp.status+'），请稍后重试。';
+    }catch(e){clearTimeout(timer);console.warn('Proxy call failed:',e.message)}
     if(attempt<1)await new Promise(r=>setTimeout(r,1500));
   }
-
-  return LANG==='en'
-    ?'Sorry, the AI is temporarily unavailable. Please try again in a moment.'
-    :'抱歉，AI 暂时不可用，请稍后重试。';
+  return LANG==='en'?'Sorry, the AI is temporarily unavailable. Please try again in a moment.':'抱歉，AI 暂时不可用，请稍后重试。';
 }
 // ══════════════════ COLLECTION ══════════════════
 let collectionFilter='all';
