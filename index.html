@@ -867,27 +867,33 @@ async function generateResp(userMsg){
 
   const messages=[{role:'system',content:systemPrompt},...chatHistory.slice(-10)];
 
-  // 调用 Cloudflare Pages /api/chat 代理
-  try{
-    const resp=await fetch(AI_WORKER_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages,exhibit:currentExhibit,mode:currentMode,lang:LANG,museum:currentMuseum})
-    });
-    if(resp.ok){const d=await resp.json();return d.response.replace(/\n/g,'<br>')}
-    console.warn('Proxy returned',resp.status);
-  }catch(e){console.warn('Proxy call failed:',e.message)}
+  // 调用 Cloudflare Pages /api/chat 代理（带重试）
+  const body=JSON.stringify({messages,exhibit:currentExhibit,mode:currentMode,lang:LANG,museum:currentMuseum});
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const resp=await fetch(AI_WORKER_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body
+      });
+      if(resp.ok){const d=await resp.json();return d.response.replace(/\n/g,'<br>')}
+      // 非 200：尝试读取后端错误信息
+      let errMsg='';
+      try{const err=await resp.json();errMsg=err.error||''}catch(_){}
+      console.warn('Proxy returned',resp.status,errMsg);
+      // 仅对 5xx 重试，4xx 直接放弃
+      if(resp.status<500||attempt===1)return LANG==='en'
+        ?'Sorry, the AI is temporarily unavailable. Please try again in a moment.'
+        :'抱歉，AI 暂时不可用（'+resp.status+'），请稍后重试。';
+    }catch(e){console.warn('Proxy call failed:',e.message)}
+    // 重试前等待 1.5 秒
+    if(attempt<1)await new Promise(r=>setTimeout(r,1500));
+  }
 
-  // 兜底：生成引导性回复
-  return generateFallback();
+  return LANG==='en'
+    ?'Sorry, the AI is temporarily unavailable. Please try again in a moment.'
+    :'抱歉，AI 暂时不可用，请稍后重试。';
 }
-function generateFallback(){
-  const tips=LANG==='en'
-    ?['Ask me about the historical background.','Try "What is this made of?" for details.','I can tell you why it matters.','Ask about the cultural significance.']
-    :['你可以问我这件文物的历史背景。','想了解更多细节？试试问"这件文物是用什么做的？"','我可以告诉你它为什么如此重要。','换个角度问，比如"它在当时的社会意味着什么？"'];
-  return tips[Math.floor(Math.random()*tips.length)];
-}
-
 // ══════════════════ COLLECTION ══════════════════
 let collectionFilter='all';
 function setCollectionFilter(f){collectionFilter=f;renderCollection()}
